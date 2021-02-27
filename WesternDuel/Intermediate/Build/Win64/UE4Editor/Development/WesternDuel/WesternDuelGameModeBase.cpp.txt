@@ -1,7 +1,0 @@
-E:\projects\ue\tr-duel-pvp\WesternDuel\Intermediate\Build\Win64\UE4Editor\Development\WesternDuel\Definitions.WesternDuel.h
-E:\projects\ue\tr-duel-pvp\WesternDuel\Source\WesternDuel\WesternDuelGameModeBase.h
-E:\EpicGames Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\GameFramework/GameModeBase.h
-E:\EpicGames Games\UE_4.26\Engine\Source\Runtime\Engine\Classes\Engine/ServerStatReplicator.h
-E:\EpicGames Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\ServerStatReplicator.generated.h
-E:\EpicGames Games\UE_4.26\Engine\Intermediate\Build\Win64\UE4Editor\Inc\Engine\GameModeBase.generated.h
-E:\projects\ue\tr-duel-pvp\WesternDuel\Intermediate\Build\Win64\UE4Editor\Inc\WesternDuel\WesternDuelGameModeBase.generated.h
