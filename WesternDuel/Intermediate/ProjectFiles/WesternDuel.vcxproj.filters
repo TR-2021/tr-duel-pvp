@@ -3,7 +3,7 @@
   <ItemGroup>
     <None Include="..\..\WesternDuel.uproject" />
     <Filter Include="Source">
-      <UniqueIdentifier>{0F7D513E-824B-41D9-B860-378454F807BC}</UniqueIdentifier>
+      <UniqueIdentifier>{4D1727F6-11A6-4703-8FC9-D0177916C587}</UniqueIdentifier>
     </Filter>
     <None Include="..\..\Source\WesternDuel.Target.cs">
       <Filter>Source</Filter>
@@ -12,7 +12,7 @@
       <Filter>Source</Filter>
     </None>
     <Filter Include="Config">
-      <UniqueIdentifier>{0610EA30-A808-464B-819B-007C9FC3998E}</UniqueIdentifier>
+      <UniqueIdentifier>{3C43A859-48E7-4447-8804-113642629F4D}</UniqueIdentifier>
     </Filter>
     <None Include="..\..\Config\DefaultEditor.ini">
       <Filter>Config</Filter>
@@ -23,8 +23,11 @@
     <None Include="..\..\Config\DefaultGame.ini">
       <Filter>Config</Filter>
     </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
     <Filter Include="Source\WesternDuel">
-      <UniqueIdentifier>{D5C121DE-908B-4A24-8C38-CC8B2F67C499}</UniqueIdentifier>
+      <UniqueIdentifier>{468382ED-7533-4AFE-8199-8B54367A4DC5}</UniqueIdentifier>
     </Filter>
     <None Include="..\..\Source\WesternDuel\WesternDuel.Build.cs">
       <Filter>Source\WesternDuel</Filter>
@@ -42,25 +45,37 @@
       <Filter>Source\WesternDuel</Filter>
     </ClInclude>
     <Filter Include="Source\WesternDuel\Private">
-      <UniqueIdentifier>{98BB2616-59C8-466A-84C8-E873CE01146D}</UniqueIdentifier>
+      <UniqueIdentifier>{EEE7F338-F52A-4077-8644-11DD0D781FFA}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="..\..\Source\WesternDuel\Private\WDGameModeBase.cpp">
       <Filter>Source\WesternDuel\Private</Filter>
     </ClCompile>
+    <Filter Include="Source\WesternDuel\Private\Animation">
+      <UniqueIdentifier>{ABB09C96-F8B7-4397-A82A-A14B67A745C1}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\WesternDuel\Private\Animation\AI_WDBaseAnimInstance.cpp">
+      <Filter>Source\WesternDuel\Private\Animation</Filter>
+    </ClCompile>
     <Filter Include="Source\WesternDuel\Private\Character">
-      <UniqueIdentifier>{4F78D779-2E86-4915-879E-EF6842C89204}</UniqueIdentifier>
+      <UniqueIdentifier>{82F00090-0B2C-4E29-91BC-27918DFFB518}</UniqueIdentifier>
     </Filter>
     <ClCompile Include="..\..\Source\WesternDuel\Private\Character\WD_BaseCharacter.cpp">
       <Filter>Source\WesternDuel\Private\Character</Filter>
     </ClCompile>
     <Filter Include="Source\WesternDuel\Public">
-      <UniqueIdentifier>{49BA7542-AC39-4BDD-81DC-F0AE5F583A18}</UniqueIdentifier>
+      <UniqueIdentifier>{DB5EC452-05EB-478C-8C69-253B27A39515}</UniqueIdentifier>
     </Filter>
     <ClInclude Include="..\..\Source\WesternDuel\Public\WDGameModeBase.h">
       <Filter>Source\WesternDuel\Public</Filter>
     </ClInclude>
+    <Filter Include="Source\WesternDuel\Public\Animation">
+      <UniqueIdentifier>{FF9BF77C-1883-48D0-987C-9E4FFA202ABE}</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="..\..\Source\WesternDuel\Public\Animation\AI_WDBaseAnimInstance.h">
+      <Filter>Source\WesternDuel\Public\Animation</Filter>
+    </ClInclude>
     <Filter Include="Source\WesternDuel\Public\Character">
-      <UniqueIdentifier>{B52CDAB9-6AF8-4E00-B5D6-B9A969F3224A}</UniqueIdentifier>
+      <UniqueIdentifier>{B9230C28-3D29-4461-9CAB-11AA205F31E7}</UniqueIdentifier>
     </Filter>
     <ClInclude Include="..\..\Source\WesternDuel\Public\Character\WD_BaseCharacter.h">
       <Filter>Source\WesternDuel\Public\Character</Filter>

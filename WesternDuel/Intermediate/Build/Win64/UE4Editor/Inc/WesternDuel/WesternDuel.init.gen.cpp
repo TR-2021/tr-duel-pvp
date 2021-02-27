@@ -21,8 +21,8 @@ void EmptyLinkFunctionForGeneratedCodeWesternDuel_init() {}
 				nullptr,
 				0,
 				PKG_CompiledIn | 0x00000000,
-				0xB0B551B4,
-				0xB47CB34E,
+				0x91BD6D7B,
+				0x24D257E5,
 				METADATA_PARAMS(nullptr, 0)
 			};
 			UE4CodeGen_Private::ConstructUPackage(ReturnPackage, PackageParams);

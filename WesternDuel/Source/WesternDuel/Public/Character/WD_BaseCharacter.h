@@ -6,24 +6,56 @@
 #include "GameFramework/Character.h"
 #include "WD_BaseCharacter.generated.h"
 
-class USkeletalMeshComponent;
+class USpringArmComponent;
+class UCameraComponent;
+class UCharacterMovementComponent;
 UCLASS()
 class WESTERNDUEL_API AWD_BaseCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AWD_BaseCharacter();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UCameraComponent* CameraComponent;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UCharacterMovementComponent* MovementComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	bool GunIsTaken = false;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	bool IsAiming = false;
+
+	float InputDirection = 0;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UFUNCTION(BlueprintCallable)
+	float GetMovementDirection();
+	
+	UFUNCTION(BlueprintCallable)
+	bool HasGunTaken() { return GunIsTaken; }
 
+	UFUNCTION(BlueprintCallable)
+	bool IsAim() { return IsAiming; };
+
+private:
+	void MoveRight(float Value);
+	void LookUp(float Value);
+	void LookAround(float Value);
+	void TakeGun();
+	void PutBackGun();
+	void StartAim();
+	void StopAim();
 };
