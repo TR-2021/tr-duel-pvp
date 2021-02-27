@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "WesternDuel",
+			"Path": "E:\\projects\\ue\\tr-duel-pvp\\WesternDuel\\Source\\WesternDuel.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "WesternDuelEditor",
+			"Path": "E:\\projects\\ue\\tr-duel-pvp\\WesternDuel\\Source\\WesternDuelEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
