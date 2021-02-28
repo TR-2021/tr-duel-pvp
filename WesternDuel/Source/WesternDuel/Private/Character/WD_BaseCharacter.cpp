@@ -5,6 +5,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/WDWeaponComponent.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -22,12 +23,13 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 	SpringArmComponent->SocketOffset = FVector(-20, 0, 60);
 	SpringArmComponent->TargetOffset = FVector(0,0,10);
 
-
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	CameraComponent->bUsePawnControlRotation = false;
+
+	WeaponComponent = CreateDefaultSubobject<UWDWeaponComponent>(TEXT("Weapon"));
 
 	GetCharacterMovement()->bUseControllerDesiredRotation = 0;
 	GetCharacterMovement()->bOrientRotationToMovement = 0;
@@ -53,7 +55,7 @@ void AWD_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	//PlayerInputComponent->BindAction("Dodge", EInputEvent::IE_Pressed, this, AWD_BaseCharacter::Dodge);
-	//PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, AWD_BaseCharacter::Fire);
+	PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::TryFire);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::StartAim);
 	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &AWD_BaseCharacter::StopAim);
 	PlayerInputComponent->BindAction("TakeGun", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::TakeGun);
@@ -89,14 +91,23 @@ void AWD_BaseCharacter::LookAround(float Value)
 		AddControllerYawInput(Value);
 }
 
+void AWD_BaseCharacter::TryFire()
+{
+	if (!WeaponComponent) return;
+	WeaponComponent->Fire();
+}
+
 void AWD_BaseCharacter::TakeGun()
 {
 	GunIsTaken = true;
+	WeaponComponent->TakeGunInHand();
 }
 
 void AWD_BaseCharacter::PutBackGun()
 {
 	GunIsTaken = false;
+	WeaponComponent->HolstersWeapon();
+
 }
 
 void AWD_BaseCharacter::StartAim()
@@ -108,6 +119,6 @@ void AWD_BaseCharacter::StartAim()
 void AWD_BaseCharacter::StopAim()
 {
 	IsAiming = false;
-
+	GunIsTaken = false;
 }
 

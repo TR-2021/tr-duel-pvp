@@ -9,6 +9,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UCharacterMovementComponent;
+class UWDWeaponComponent;
 UCLASS()
 class WESTERNDUEL_API AWD_BaseCharacter : public ACharacter
 {
@@ -28,6 +29,10 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	UCharacterMovementComponent* MovementComponent;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UWDWeaponComponent* WeaponComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	bool GunIsTaken = false;
@@ -54,6 +59,7 @@ private:
 	void MoveRight(float Value);
 	void LookUp(float Value);
 	void LookAround(float Value);
+	void TryFire();
 	void TakeGun();
 	void PutBackGun();
 	void StartAim();
