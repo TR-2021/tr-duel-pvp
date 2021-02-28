@@ -4,7 +4,10 @@
 #include "Weapon/WDProjectTileActor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
-
+#include "Character/WD_BaseCharacter.h"
+#include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 AWDProjectTileActor::AWDProjectTileActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -45,4 +48,14 @@ void AWDProjectTileActor::SetLifeTime(float Time)
 
 void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	Destroy();
+
+	if (!GetWorld()) return;
+
+	AWD_BaseCharacter* Character = Cast<AWD_BaseCharacter>(OtherActor);
+	if (!Character) return;
+
+	APlayerController* PlayerController =UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	Character->TakeDamage(Damage, {}, PlayerController, GetOwner());
+
 }

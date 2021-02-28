@@ -32,13 +32,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectTile")
 	UStaticMeshComponent* ProjectileMesh;
 
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectTile")
+	float Damage = 40;
+
 	UPROPERTY()
 	FVector ShotDirection;
+
 	UPROPERTY()
 	float LifeSpan=1;
 
 public:	
 	void SetShotDirection(FVector Vector);
 	void SetLifeTime(float Time);
+	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };

@@ -13,5 +13,7 @@ UCLASS()
 class WESTERNDUEL_API AWDGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+public:
+	AWDGameModeBase();
+
 };

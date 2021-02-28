@@ -28,9 +28,9 @@ void AWDWeaponBase::Tick(float DeltaSeconds)
 }
 void AWDWeaponBase::Fire()
 {
-	if (!IsEmpty() || GetWorld()) {
+	if (!IsEmpty() && GetWorld()) {
 		//Fire
-		CurrentWeaponData.CurrentBullets--;
+		DecreaseAmmoBy(1);
 		//Spawn ProjectTile
 		FTransform ProjectileTransform = FTransform(FRotator::ZeroRotator, GetMuzzleLocation());
 		auto ProjectTile = GetWorld()->SpawnActorDeferred<AWDProjectTileActor>(CurrentWeaponData.ProjectileClass, ProjectileTransform, GetOwner());
@@ -45,7 +45,9 @@ bool AWDWeaponBase::IsEmpty()
 {
 	return CurrentWeaponData.CurrentBullets == 0;
 }
-
+void AWDWeaponBase::DecreaseAmmoBy(int32 Num) {
+	CurrentWeaponData.CurrentBullets = FMath::Clamp<int32>(CurrentWeaponData.CurrentBullets-Num,0, CurrentWeaponData.MaxBullets);
+}
 FVector AWDWeaponBase::GetMuzzleLocation() {
 	return SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
 }

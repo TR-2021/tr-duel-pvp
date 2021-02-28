@@ -2,4 +2,10 @@
 
 
 #include "WDGameModeBase.h"
+#include "Character/WDPlayerController.h"
+
+AWDGameModeBase::AWDGameModeBase() {
+	PlayerControllerClass = AWDPlayerController::StaticClass();
+}
+
 

@@ -53,5 +53,6 @@ public:
 	bool IsEmpty();
 	UFUNCTION()
 	FVector GetMuzzleLocation();
-
+private:
+	void DecreaseAmmoBy(int32 Num);
 };

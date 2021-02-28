@@ -2,12 +2,16 @@
 
 
 #include "Character/WD_BaseCharacter.h"
+#include "Character/WDPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WDWeaponComponent.h"
-#include "DrawDebugHelpers.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/WDHealthComponent.h"
 
+#include "DrawDebugHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 AWD_BaseCharacter::AWD_BaseCharacter()
@@ -30,7 +34,7 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 	CameraComponent->bUsePawnControlRotation = false;
 
 	WeaponComponent = CreateDefaultSubobject<UWDWeaponComponent>(TEXT("Weapon"));
-
+	HealthComponent = CreateDefaultSubobject<UWDHealthComponent>(TEXT("Health"));
 	GetCharacterMovement()->bUseControllerDesiredRotation = 0;
 	GetCharacterMovement()->bOrientRotationToMovement = 0;
 }
@@ -39,15 +43,18 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 void AWD_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	HealthComponent->OnDie.AddUObject(this, &AWD_BaseCharacter::OnDie);
 }
 
 // Called every frame
 void AWD_BaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector AimDirection = GetBaseAimRotation().Vector();
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, AimDirection.ToString());
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + AimDirection * 400, FColor::Red, false, 0.1, 0, 1);
+	FVector BaseAimDirection = GetBaseAimRotation().Vector();
+	FVector ForwardVector = GetActorRotation().Vector();
+	
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + BaseAimDirection * 400, FColor::Red, false, 0.1, 0, 1);
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + ForwardVector * 400, FColor::Green, false, 0.1, 0, 1);
 }
 
 // Called to bind functionality to input
@@ -72,7 +79,11 @@ float AWD_BaseCharacter::GetMovementDirection()
 	float Direction = GetVelocity().Size()*InputDirection;
 	return Direction;
 }
-
+FRotator AWD_BaseCharacter::GetAimDirection() {
+	FRotator AimRotator = GetBaseAimRotation() - GetActorRotation();
+	AimRotator.Yaw = UKismetMathLibrary::NormalizeAxis(AimRotator.Yaw);
+	return AimRotator;
+}
 void AWD_BaseCharacter::MoveRight(float Value)
 {
 	if (!GunIsTaken) {
@@ -119,6 +130,22 @@ void AWD_BaseCharacter::StartAim()
 void AWD_BaseCharacter::StopAim()
 {
 	IsAiming = false;
-	GunIsTaken = false;
+}
+
+void AWD_BaseCharacter::OnDie()
+{
+	
+	const auto PlayerController = GetController();
+	if (!PlayerController) return;
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Cyan, GetName() + " Died");
+
+	GetMovementComponent()->StopMovementImmediately();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetEnablePhysicsBlending(true);
+	GetMesh()->AddForceAtLocation(-GetActorForwardVector() * 3000000, GetActorLocation(),"spine_01");
+	PlayerController->ChangeState(NAME_Spectating);
+
 }
 
