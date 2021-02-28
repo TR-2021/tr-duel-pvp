@@ -3,6 +3,7 @@
 
 #include "Weapon/WDWeaponBase.h"
 #include "Weapon/WDProjectTileActor.h"
+#include "UI/WDCrosshairActor.h"
 #include "DrawDebugHelpers.h"
 
 AWDWeaponBase::AWDWeaponBase()
@@ -11,8 +12,6 @@ AWDWeaponBase::AWDWeaponBase()
 	
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Root"));
 	RootComponent = SkeletalMeshComponent;
-
-	CurrentWeaponData = FWeaponData{ 6, 6 };
 	MuzzleSocketName = "Muzzle";
 
 }
@@ -20,11 +19,25 @@ AWDWeaponBase::AWDWeaponBase()
 void AWDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
+	Crosshair = GetWorld()->SpawnActor<AWDCrosshairActor>(CurrentWeaponData.CrosshairClass);
 }
 void AWDWeaponBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	DrawDebugLine(GetWorld(), GetMuzzleLocation(), GetMuzzleLocation() + GetActorForwardVector() * 1200, FColor::Blue,false, 0.1f, 0, 1);
+	if (ShouldDrawCrosshair) {
+		FHitResult Hit;
+		FVector Start = GetMuzzleLocation();
+		FVector End = GetMuzzleLocation() + GetActorForwardVector() * 3381.236643389053;
+		//DrawDebugLine(GetWorld(), Start, End, FColor::Blue, false, 0.1f, 0, 1);
+		//// TODO Fix crosshair
+		//GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Pawn);
+
+		//if (Hit.bBlockingHit) {
+		//	DrawDebugLine(GetWorld(), Start, Hit.ImpactPoint, FColor::Cyan, false, 0.1f, 0, 1);
+		//	End = Hit.ImpactPoint;
+		//}
+		Crosshair->SetActorLocation(End);
+	}
 }
 void AWDWeaponBase::Fire()
 {
@@ -40,7 +53,6 @@ void AWDWeaponBase::Fire()
 	}
 }
 
-
 bool AWDWeaponBase::IsEmpty()
 {
 	return CurrentWeaponData.CurrentBullets == 0;
@@ -50,4 +62,9 @@ void AWDWeaponBase::DecreaseAmmoBy(int32 Num) {
 }
 FVector AWDWeaponBase::GetMuzzleLocation() {
 	return SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);
+}
+
+USkeletalMeshComponent* AWDWeaponBase::GetMesh()
+{
+	return SkeletalMeshComponent;
 }

@@ -4,7 +4,7 @@
 #include "Components/WDWeaponComponent.h"
 #include "Weapon/WDWeaponBase.h"
 #include "GameFramework/Character.h"
-#include "Weapon/WDWeaponBase.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values for this component's properties
 UWDWeaponComponent::UWDWeaponComponent()
@@ -52,6 +52,9 @@ void UWDWeaponComponent::TakeGunInHand() {
 	AttachWeaponTo(CurrentWeapon, Character->GetMesh(), HandSocketName);
 }
 
+AWDWeaponBase* UWDWeaponComponent::GetWeapon() {
+	return CurrentWeapon;
+}
 
 void UWDWeaponComponent::HolstersWeapon() {
 	if (!GetWorld() || !CurrentWeapon) return;
@@ -65,4 +68,13 @@ void UWDWeaponComponent::Fire()
 {
 	if (!CurrentWeapon) return;
 	CurrentWeapon->Fire();
+}
+void UWDWeaponComponent::Detach() {
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	 CurrentWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	 CurrentWeapon->GetMesh()->SetAllBodiesSimulatePhysics(true);
+	 CurrentWeapon->GetMesh()->SetEnablePhysicsBlending(true);
+}
+void UWDWeaponComponent::SetCrosshairVisibility(bool Visible) {
+	CurrentWeapon->SetCrosshairDrawing(Visible);
 }

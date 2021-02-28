@@ -7,7 +7,7 @@
 #include "WDWeaponBase.generated.h"
 
 class AWDProjectTileActor;
-
+class AWDCrosshairActor;
 USTRUCT(BlueprintType)
 struct FWeaponData {
 	GENERATED_USTRUCT_BODY()
@@ -21,6 +21,8 @@ struct FWeaponData {
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<AWDProjectTileActor> ProjectileClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AWDCrosshairActor> CrosshairClass;
 
 };
 
@@ -46,13 +48,29 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FWeaponData CurrentWeaponData;
+	
+	UPROPERTY()
+	AWDCrosshairActor* Crosshair;
+	UPROPERTY()
+	bool ShouldDrawCrosshair = true;
+
 public:
 	UFUNCTION()
 	void Fire();
+
 	UFUNCTION()
 	bool IsEmpty();
+
 	UFUNCTION()
 	FVector GetMuzzleLocation();
+
+	UFUNCTION()
+	USkeletalMeshComponent* GetMesh();
+
+	UFUNCTION()
+	void SetCrosshairDrawing(bool IsDrawing) { ShouldDrawCrosshair = IsDrawing; }
+
 private:
 	void DecreaseAmmoBy(int32 Num);
+	
 };

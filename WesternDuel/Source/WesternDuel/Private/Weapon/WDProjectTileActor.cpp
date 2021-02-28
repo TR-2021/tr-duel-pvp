@@ -7,7 +7,10 @@
 #include "Character/WD_BaseCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Containers/Map.h"
 #include "DrawDebugHelpers.h"
+
 AWDProjectTileActor::AWDProjectTileActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -16,6 +19,7 @@ AWDProjectTileActor::AWDProjectTileActor()
 	SphereCollider->InitSphereRadius(10.0f);
 	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SphereCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
 	RootComponent = SphereCollider;
 
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
@@ -32,6 +36,7 @@ void AWDProjectTileActor::BeginPlay()
 	Super::BeginPlay();
 	ProjectileMovementComponent->Velocity = ShotDirection * ProjectileMovementComponent->InitialSpeed;
 	SphereCollider->OnComponentHit.AddDynamic(this, &AWDProjectTileActor::OnHit);
+	SphereCollider->bReturnMaterialOnMove = true;
 	SetLifeSpan(LifeSpan);
 	
 }
@@ -56,6 +61,10 @@ void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* Other
 	if (!Character) return;
 
 	APlayerController* PlayerController =UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	Character->TakeDamage(Damage, {}, PlayerController, GetOwner());
-
+	UPhysicalMaterial* PhysMaterial = Hit.PhysMaterial.Get();
+	float ResultDamage = BaseDamage;
+	if (PhysicsDamageMap.Contains(PhysMaterial)) {
+		ResultDamage = PhysicsDamageMap[PhysMaterial];
+	}
+	Character->TakeDamage(ResultDamage, {}, PlayerController, GetOwner());
 }

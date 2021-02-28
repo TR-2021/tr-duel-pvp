@@ -3,15 +3,17 @@
 
 #include "Character/WD_BaseCharacter.h"
 #include "Character/WDPlayerController.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WDWeaponComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WDHealthComponent.h"
+#include "Weapon/WDWeaponBase.h"
 
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AWD_BaseCharacter::AWD_BaseCharacter()
@@ -44,6 +46,8 @@ void AWD_BaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	HealthComponent->OnDie.AddUObject(this, &AWD_BaseCharacter::OnDie);
+	auto const CurrentPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	WeaponComponent->SetCrosshairVisibility(CurrentPlayerController == GetController());
 }
 
 // Called every frame
@@ -138,7 +142,7 @@ void AWD_BaseCharacter::OnDie()
 	const auto PlayerController = GetController();
 	if (!PlayerController) return;
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Cyan, GetName() + " Died");
-
+	WeaponComponent->Detach();
 	GetMovementComponent()->StopMovementImmediately();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

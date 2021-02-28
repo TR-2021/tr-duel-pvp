@@ -9,7 +9,6 @@
 class UProjectileMovementComponent;
 class USphereComponent;
 class UStaticMeshComponent;
-
 UCLASS()
 class WESTERNDUEL_API AWDProjectTileActor : public AActor
 {
@@ -33,13 +32,16 @@ protected:
 	UStaticMeshComponent* ProjectileMesh;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectTile")
-	float Damage = 40;
+	float BaseDamage = 40;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<UPhysicalMaterial*, float> PhysicsDamageMap;
 
 	UPROPERTY()
 	FVector ShotDirection;
 
 	UPROPERTY()
-	float LifeSpan=1;
+	float LifeSpan=3 ;
 
 public:	
 	void SetShotDirection(FVector Vector);

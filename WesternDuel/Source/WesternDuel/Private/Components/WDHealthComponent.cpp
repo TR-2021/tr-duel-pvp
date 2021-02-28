@@ -14,7 +14,6 @@ void UWDHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	auto Owner = GetOwner();
-	
 	if (!Owner) return;
 
 	Owner->OnTakeAnyDamage.AddDynamic(this, &UWDHealthComponent::OnAnyDamage);
@@ -24,7 +23,7 @@ void UWDHealthComponent::OnAnyDamage(AActor* DamagedActor, float Damage, const U
 {
 	if (IsDead()) return;
 
-	HealthData.CurrentHealth = FMath::Clamp<float>(HealthData.CurrentHealth - Damage, 0, HealthData.DefaultHealth);
+	SetHealth(HealthData.CurrentHealth - Damage);
 	if (IsDead())
 	{
 		OnDie.Broadcast();
@@ -35,4 +34,7 @@ bool UWDHealthComponent::IsDead()
 {
 	return HealthData.CurrentHealth == 0;
 }
-
+void UWDHealthComponent::SetHealth(float Health) {
+	HealthData.CurrentHealth = FMath::Clamp<float>(Health, 0, HealthData.DefaultHealth);
+	OnHealthChanged.Broadcast(Health);
+}

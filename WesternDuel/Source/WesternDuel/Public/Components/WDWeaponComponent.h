@@ -41,4 +41,7 @@ public:
 	void TakeGunInHand();
 	void HolstersWeapon();
 	void Fire();
+	AWDWeaponBase* GetWeapon();
+	void Detach();
+	void SetCrosshairVisibility(bool Visible);
 };

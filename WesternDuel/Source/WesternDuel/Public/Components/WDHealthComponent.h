@@ -7,6 +7,7 @@
 #include "WDHealthComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FHealthOnDieSignature)
+DECLARE_MULTICAST_DELEGATE_OneParam(FHealthOnChangedSignature, float);
 
 USTRUCT(BlueprintType)
 struct FHealthData
@@ -30,6 +31,7 @@ public:
 	UWDHealthComponent();
 	
 	FHealthOnDieSignature OnDie;
+	FHealthOnChangedSignature OnHealthChanged;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -37,6 +39,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
 	FHealthData HealthData;
 
+	void SetHealth(float Health);
 
 public:
 	UFUNCTION()
