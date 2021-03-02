@@ -9,12 +9,14 @@
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Containers/Map.h"
+#include "Net/UnrealNetwork.h"
+
 #include "DrawDebugHelpers.h"
 
 AWDProjectTileActor::AWDProjectTileActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
-	
+	bReplicates = true;
 	SphereCollider = CreateDefaultSubobject<USphereComponent>("Collider");
 	SphereCollider->InitSphereRadius(10.0f);
 	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -67,4 +69,8 @@ void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* Other
 		ResultDamage = PhysicsDamageMap[PhysMaterial];
 	}
 	Character->TakeDamage(ResultDamage, {}, PlayerController, GetOwner());
+}
+void AWDProjectTileActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AWDProjectTileActor, ShotDirection);
 }

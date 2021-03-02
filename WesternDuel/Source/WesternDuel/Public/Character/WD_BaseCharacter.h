@@ -21,7 +21,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	USpringArmComponent* SpringArmComponent;
 
@@ -31,18 +32,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	UCharacterMovementComponent* MovementComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
 	UWDWeaponComponent* WeaponComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Weapon")
 	UWDHealthComponent* HealthComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Player")
 	bool GunIsTaken = false;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Player")
 	bool IsAiming = false;
-
+	
+	UPROPERTY(ReplicatedUsing = OnRep_Direction)
 	float InputDirection = 0;
 
 public:	
@@ -60,15 +62,43 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	FRotator GetAimDirection();
+
+	UFUNCTION(BlueprintCallable)
+	UWDHealthComponent* GetHealthComponent() { return HealthComponent; };
+
+
 private:
+	UFUNCTION(Server, unreliable)
 	void MoveRight(float Value);
+
+	void TryMoveRight(float Value);
 	void LookUp(float Value);
+
 	void LookAround(float Value);
+	
+	UFUNCTION(Server, unreliable)
 	void TryFire();
+	
+	UFUNCTION(Server, reliable)
 	void TakeGun();
+	
+	UFUNCTION(Server, reliable)
 	void PutBackGun();
+	
+	UFUNCTION(Server, reliable)
 	void StartAim();
+	
+	UFUNCTION(Server, reliable)
 	void StopAim();
+	
 	UFUNCTION()
-	void OnDie();
+	void OnDie(AController* KilledBy);
+	
+
+	UFUNCTION(NetMulticast, reliable)
+	void KillCharacter();
+
+	UFUNCTION()
+	void OnRep_Direction();
+
 };

@@ -21,8 +21,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectTile")
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditDefaultsOnly, replicated, Category = "ProjectTile")
 	UProjectileMovementComponent* ProjectileMovementComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectTile")
@@ -37,7 +38,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<UPhysicalMaterial*, float> PhysicsDamageMap;
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	FVector ShotDirection;
 
 	UPROPERTY()

@@ -13,5 +13,9 @@ UCLASS()
 class WESTERNDUEL_API AWDPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+protected:
+	virtual void BeginPlay() override;
+public:
+	AWDPlayerController();
+
 };

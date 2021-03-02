@@ -2,6 +2,8 @@
 
 
 #include "Components/WDHealthComponent.h"
+#include "Net/UnrealNetwork.h"
+
 
 UWDHealthComponent::UWDHealthComponent()
 {
@@ -13,9 +15,10 @@ UWDHealthComponent::UWDHealthComponent()
 void UWDHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	SetIsReplicated(true);
+	
 	auto Owner = GetOwner();
 	if (!Owner) return;
-
 	Owner->OnTakeAnyDamage.AddDynamic(this, &UWDHealthComponent::OnAnyDamage);
 }
 
@@ -26,7 +29,7 @@ void UWDHealthComponent::OnAnyDamage(AActor* DamagedActor, float Damage, const U
 	SetHealth(HealthData.CurrentHealth - Damage);
 	if (IsDead())
 	{
-		OnDie.Broadcast();
+		OnDie.Broadcast(InstigatedBy);
 	}
 }
 
@@ -38,3 +41,14 @@ void UWDHealthComponent::SetHealth(float Health) {
 	HealthData.CurrentHealth = FMath::Clamp<float>(Health, 0, HealthData.DefaultHealth);
 	OnHealthChanged.Broadcast(Health);
 }
+
+float UWDHealthComponent::GetHealth() {
+	return HealthData.CurrentHealth;
+}
+
+void UWDHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UWDHealthComponent, HealthData);
+}
+

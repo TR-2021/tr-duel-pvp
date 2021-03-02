@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "WDHealthComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FHealthOnDieSignature)
+DECLARE_MULTICAST_DELEGATE_OneParam(FHealthOnDieSignature, AController*)
 DECLARE_MULTICAST_DELEGATE_OneParam(FHealthOnChangedSignature, float);
 
 USTRUCT(BlueprintType)
@@ -29,14 +29,14 @@ class WESTERNDUEL_API UWDHealthComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UWDHealthComponent();
-	
 	FHealthOnDieSignature OnDie;
 	FHealthOnChangedSignature OnHealthChanged;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Health")
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Health")
 	FHealthData HealthData;
 
 	void SetHealth(float Health);
@@ -45,4 +45,6 @@ public:
 	UFUNCTION()
 	void OnAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	bool IsDead();
+	UFUNCTION(BlueprintCallable)
+	float GetHealth();
 };

@@ -4,6 +4,7 @@
 #include "Weapon/WDWeaponBase.h"
 #include "Weapon/WDProjectTileActor.h"
 #include "UI/WDCrosshairActor.h"
+#include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
 
 AWDWeaponBase::AWDWeaponBase()
@@ -20,6 +21,7 @@ void AWDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	Crosshair = GetWorld()->SpawnActor<AWDCrosshairActor>(CurrentWeaponData.CrosshairClass);
+	bReplicates = true;
 }
 void AWDWeaponBase::Tick(float DeltaSeconds)
 {
@@ -39,7 +41,7 @@ void AWDWeaponBase::Tick(float DeltaSeconds)
 		Crosshair->SetActorLocation(End);
 	}
 }
-void AWDWeaponBase::Fire()
+void AWDWeaponBase::Fire_Implementation()
 {
 	if (!IsEmpty() && GetWorld()) {
 		//Fire
@@ -67,4 +69,14 @@ FVector AWDWeaponBase::GetMuzzleLocation() {
 USkeletalMeshComponent* AWDWeaponBase::GetMesh()
 {
 	return SkeletalMeshComponent;
+}
+
+void  AWDWeaponBase::SetCrosshairDrawing(bool IsDrawing) {
+	ShouldDrawCrosshair = IsDrawing;
+	Crosshair->SetActorHiddenInGame(!IsDrawing);
+}
+void AWDWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AWDWeaponBase, SkeletalMeshComponent);
+	DOREPLIFETIME(AWDWeaponBase, CurrentWeaponData);
 }

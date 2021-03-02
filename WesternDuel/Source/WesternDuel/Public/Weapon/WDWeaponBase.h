@@ -39,14 +39,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, replicated,Category = "Weapon")
 	USkeletalMeshComponent* SkeletalMeshComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, replicated, Category = "Weapon")
 	FWeaponData CurrentWeaponData;
 	
 	UPROPERTY()
@@ -55,7 +56,7 @@ protected:
 	bool ShouldDrawCrosshair = true;
 
 public:
-	UFUNCTION()
+	UFUNCTION(Server, reliable)
 	void Fire();
 
 	UFUNCTION()
@@ -68,7 +69,8 @@ public:
 	USkeletalMeshComponent* GetMesh();
 
 	UFUNCTION()
-	void SetCrosshairDrawing(bool IsDrawing) { ShouldDrawCrosshair = IsDrawing; }
+	void SetCrosshairDrawing(bool IsDrawing);
+
 
 private:
 	void DecreaseAmmoBy(int32 Num);
