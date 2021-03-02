@@ -9,9 +9,11 @@
 /**
  * 
  */
+DECLARE_MULTICAST_DELEGATE(FMainMenuOnJoinSignature)
+
 class UButton;
 class UWidgetSwitcher;
-
+class UEditableTextBox;
 UENUM()
 enum class EMainMenuAction : uint8 {
 	NONE,
@@ -37,10 +39,15 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UWidgetSwitcher* LayoutSwitcher;
 
+	UPROPERTY(meta = (BindWidget))
+		UEditableTextBox* NameTextBox;
 
 	EMainMenuAction MenuAction = EMainMenuAction::NONE;
 
 	virtual void NativeOnInitialized() override;
+
+public:
+	FMainMenuOnJoinSignature OnJoinRequest;
 private:
 	UFUNCTION()
 	void OnHostGame();
@@ -50,8 +57,10 @@ private:
 
 	UFUNCTION()
 	void OnSubmitName();
-
-
+	
+	UFUNCTION()
+	void JoinGame();
+	
 	UFUNCTION()
 	void HostGame();
 };

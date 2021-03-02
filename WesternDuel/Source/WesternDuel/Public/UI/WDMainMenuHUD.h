@@ -16,4 +16,11 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> MenuWidgetClass;
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> LobbySearchWidgetClass;
+
+private:
+	void OnJoinRequest();
 };
