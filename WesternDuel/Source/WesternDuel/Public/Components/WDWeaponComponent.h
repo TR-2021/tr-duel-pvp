@@ -19,7 +19,8 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	
+	virtual void BeginDestroy() override;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	FName HolsterSocketName = "Weapon_Holster";
 	
@@ -44,4 +45,6 @@ public:
 	AWDWeaponBase* GetWeapon();
 	void Detach();
 	void SetCrosshairVisibility(bool Visible);
+	void DestroyWeapon();
+
 };

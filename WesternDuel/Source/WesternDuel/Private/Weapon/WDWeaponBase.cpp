@@ -23,6 +23,13 @@ void AWDWeaponBase::BeginPlay()
 	Crosshair = GetWorld()->SpawnActor<AWDCrosshairActor>(CurrentWeaponData.CrosshairClass);
 	bReplicates = true;
 }
+void AWDWeaponBase::BeginDestroy()
+{
+	if(Crosshair)
+		Crosshair->Destroy();
+	Super::BeginDestroy();
+}
+
 void AWDWeaponBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -79,4 +86,6 @@ void AWDWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDWeaponBase, SkeletalMeshComponent);
 	DOREPLIFETIME(AWDWeaponBase, CurrentWeaponData);
+	DOREPLIFETIME(AWDWeaponBase, ShouldDrawCrosshair);
+	
 }

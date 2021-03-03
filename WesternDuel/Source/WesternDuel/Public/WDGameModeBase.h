@@ -16,6 +16,10 @@ class WESTERNDUEL_API AWDGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 protected:
+
+	int32 MaxPlayers = 2;
+	int32 MaxRounds = 6;
+
 	TArray<AWDPlayerController*> Players;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -33,7 +37,28 @@ protected:
 
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+	// Delete Unpossessed Pawn and Its guns
+	UFUNCTION()
+	void ClearWorld();
+
+	template <class T >
+	void RemoveAllActorsByClass();
 public:
 	AWDGameModeBase();
-	
+	int32 GetMaxRounds() { return MaxRounds; }
+
+
+	void RestartRound();
 };
+
+template<class T>
+void AWDGameModeBase::RemoveAllActorsByClass()
+{
+		TArray<AActor*> ActorList;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), T::StaticClass(), ActorList);
+		for (auto Actor : ActorList)
+		{
+			Actor->Destroy();
+		}
+}

@@ -2,12 +2,14 @@
 
 
 #include "Character/WD_BaseCharacter.h"
+#include "WDGameStateBase.h"
 #include "Character/WDPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
-#include "Components/WDWeaponComponent.h"
+#include "UI/WDCrosshairActor.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WDWeaponComponent.h"
 #include "Components/WDHealthComponent.h"
 #include "Weapon/WDWeaponBase.h"
 
@@ -51,19 +53,24 @@ void AWD_BaseCharacter::BeginPlay()
 	WeaponComponent->SetIsReplicated(true);
 	GetCapsuleComponent()->SetIsReplicated(true);
 	GetMesh()->SetIsReplicated(true);
-	WeaponComponent->SetCrosshairVisibility(HasAuthority() || GetLocalRole() == ENetRole::ROLE_AutonomousProxy );
+	WeaponComponent->SetCrosshairVisibility(IsLocallyControlled());
 	
 }
-
+void AWD_BaseCharacter::UnPossessed()
+{
+	DeleteWeapon();
+	Super::UnPossessed();
+}
 // Called every frame
 void AWD_BaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	/*FVector BaseAimDirection = GetBaseAimRotation().Vector();
+	if(IsLocallyControlled())
+		UpdateAimDirection(GetBaseAimRotation());
+	FVector BaseAimDirection = AimRotator.Vector();
 	FVector ForwardVector = GetActorRotation().Vector();
-	
 	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + BaseAimDirection * 400, FColor::Red, false, 0.1, 0, 1);
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + ForwardVector * 400, FColor::Green, false, 0.1, 0, 1);*/
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + ForwardVector * 400, FColor::Green, false, 0.1, 0, 1);
 }
 
 // Called to bind functionality to input
@@ -71,11 +78,11 @@ void AWD_BaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	//PlayerInputComponent->BindAction("Dodge", EInputEvent::IE_Pressed, this, AWD_BaseCharacter::Dodge);
-	PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::TryFire);
-	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::StartAim);
-	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &AWD_BaseCharacter::StopAim);
-	PlayerInputComponent->BindAction("TakeGun", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::TakeGun);
-	PlayerInputComponent->BindAction("TakeGun", EInputEvent::IE_Released, this, &AWD_BaseCharacter::PutBackGun);
+	PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::Server_TryFire);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::Server_StartAim);
+	PlayerInputComponent->BindAction("Aim", EInputEvent::IE_Released, this, &AWD_BaseCharacter::Server_StopAim);
+	PlayerInputComponent->BindAction("TakeGun", EInputEvent::IE_Pressed, this, &AWD_BaseCharacter::Server_RequestTakeGun);
+	PlayerInputComponent->BindAction("TakeGun", EInputEvent::IE_Released, this, &AWD_BaseCharacter::Server_RequestPutBackGun);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AWD_BaseCharacter::TryMoveRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AWD_BaseCharacter::LookUp);
 	PlayerInputComponent->BindAxis("LookAround", this, &AWD_BaseCharacter::LookAround);
@@ -88,12 +95,24 @@ float AWD_BaseCharacter::GetMovementDirection()
 	float Direction = GetVelocity().Size()*InputDirection;
 	return Direction;
 }
-FRotator AWD_BaseCharacter::GetAimDirection() {
+FRotator AWD_BaseCharacter::GetAimDirection() 
+{
+	FRotator AimDiff = GetAimOffsets();
+	AimDiff.Yaw = UKismetMathLibrary::NormalizeAxis(AimDiff.Yaw);
+	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, AimDiff.ToString() + "  " + FString::FromInt(GetLocalRole()));
+	return AimDiff;
+}
+void AWD_BaseCharacter::UpdateAimDirection_Implementation(FRotator ClientAimRotation)
+{
+	AimRotator = ClientAimRotation;
+}
+FRotator AWD_BaseCharacter::GetAimOffsets() 
+{
+	const FVector AimDirWS = AimRotator.Vector();
+	const FVector AimDirLS = ActorToWorld().InverseTransformVectorNoScale(AimDirWS);
+	const FRotator AimRotLS = AimDirLS.Rotation();
 
-	FRotator AimRotator = GetBaseAimRotation() - GetActorRotation();
-	AimRotator.Yaw = UKismetMathLibrary::NormalizeAxis(AimRotator.Yaw);
-	FString Iam = HasAuthority() ? "Server" : "Client";
-	return AimRotator;
+	return AimRotLS;
 }
 void AWD_BaseCharacter::TryMoveRight(float Value) 
 {
@@ -108,15 +127,15 @@ void AWD_BaseCharacter::MoveRight_Implementation(float Value)
 }
 void AWD_BaseCharacter::LookUp(float Value)
 {
-		AddControllerPitchInput(Value);
+	AddControllerPitchInput(Value);
 }
 
 void AWD_BaseCharacter::LookAround(float Value)
 {
-		AddControllerYawInput(Value);
+	AddControllerYawInput(Value);
 }
 
-void AWD_BaseCharacter::TryFire_Implementation()
+void AWD_BaseCharacter::Server_TryFire_Implementation()
 {
 	if (!WeaponComponent) return;
 	WeaponComponent->Fire();
@@ -124,24 +143,32 @@ void AWD_BaseCharacter::TryFire_Implementation()
 
 void AWD_BaseCharacter::TakeGun_Implementation()
 {
-	GunIsTaken = true;
 	WeaponComponent->TakeGunInHand();
 }
-
+void AWD_BaseCharacter::Server_RequestTakeGun_Implementation()
+{
+	GunIsTaken = true;
+	TakeGun();
+}
 void AWD_BaseCharacter::PutBackGun_Implementation()
 {
-	GunIsTaken = false;
 	WeaponComponent->HolstersWeapon();
-
 }
 
-void AWD_BaseCharacter::StartAim_Implementation()
+void AWD_BaseCharacter::Server_RequestPutBackGun_Implementation()
+{
+	GunIsTaken = false;
+	PutBackGun();
+}
+
+
+void AWD_BaseCharacter::Server_StartAim_Implementation()
 {
 	if(GunIsTaken)
 		IsAiming = true;
 }
 
-void AWD_BaseCharacter::StopAim_Implementation()
+void AWD_BaseCharacter::Server_StopAim_Implementation()
 {
 	IsAiming = false;
 }
@@ -149,11 +176,13 @@ void AWD_BaseCharacter::StopAim_Implementation()
 void AWD_BaseCharacter::OnDie(AController* KilledBy)
 {
 	KillCharacter();
+	GetWorld()->GetGameState<AWDGameStateBase>()->NextRound();
 }
 
 void AWD_BaseCharacter::KillCharacter_Implementation() {
 	WeaponComponent->Detach();
 	WeaponComponent->SetCrosshairVisibility(false);
+	DeleteWeapon();
 
 	GetMovementComponent()->StopMovementImmediately();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -161,7 +190,6 @@ void AWD_BaseCharacter::KillCharacter_Implementation() {
 	GetMesh()->SetAllBodiesSimulatePhysics(true);
 	GetMesh()->SetEnablePhysicsBlending(true);
 	GetMesh()->AddForceAtLocation(-GetActorForwardVector() * 3000000, GetActorLocation(), "spine_01");
-	
 	const auto PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController) return;
 	PlayerController->ChangeState(NAME_Spectating);
@@ -169,14 +197,22 @@ void AWD_BaseCharacter::KillCharacter_Implementation() {
 void AWD_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWD_BaseCharacter, GunIsTaken);
+	DOREPLIFETIME(AWD_BaseCharacter, AimRotator);
 	DOREPLIFETIME(AWD_BaseCharacter, IsAiming);
 	DOREPLIFETIME(AWD_BaseCharacter, HealthComponent);
 	DOREPLIFETIME(AWD_BaseCharacter, InputDirection);
 	DOREPLIFETIME(AWD_BaseCharacter, WeaponComponent);
+
 };
 
 void AWD_BaseCharacter::OnRep_Direction() {
 	FString Iam = HasAuthority() ? "Server" : "Client";
-	
-	UE_LOG(LogTemp, Warning, TEXT("IM - %s, replicated new Value %f"),*Iam,InputDirection);
+}
+
+
+void AWD_BaseCharacter::DeleteWeapon_Implementation()
+{
+	WeaponComponent->GetWeapon()->GetCrosshair()->Destroy();
+	WeaponComponent->GetWeapon()->Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("IM %d"),GetLocalRole());
 }

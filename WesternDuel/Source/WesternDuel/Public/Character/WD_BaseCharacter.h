@@ -21,6 +21,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void UnPossessed() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
@@ -46,6 +47,10 @@ protected:
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Direction)
 	float InputDirection = 0;
+	
+	UPROPERTY(Replicated)
+	FRotator AimRotator;
+
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -63,8 +68,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FRotator GetAimDirection();
 
+	UFUNCTION(Server, unreliable)
+	void UpdateAimDirection(FRotator ClientAimRotation);
+
 	UFUNCTION(BlueprintCallable)
 	UWDHealthComponent* GetHealthComponent() { return HealthComponent; };
+
+	FRotator GetAimOffsets();
 
 
 private:
@@ -77,19 +87,28 @@ private:
 	void LookAround(float Value);
 	
 	UFUNCTION(Server, unreliable)
-	void TryFire();
+	void Server_TryFire();
 	
 	UFUNCTION(Server, reliable)
+	void Server_RequestTakeGun();
+	
+
+	UFUNCTION(NetMulticast, reliable)
 	void TakeGun();
-	
+
 	UFUNCTION(Server, reliable)
+	void Server_RequestPutBackGun();
+
+
+	UFUNCTION(NetMulticast, reliable)
 	void PutBackGun();
 	
-	UFUNCTION(Server, reliable)
-	void StartAim();
 	
 	UFUNCTION(Server, reliable)
-	void StopAim();
+	void Server_StartAim();
+	
+	UFUNCTION(Server, reliable)
+	void Server_StopAim();
 	
 	UFUNCTION()
 	void OnDie(AController* KilledBy);
@@ -98,6 +117,8 @@ private:
 	UFUNCTION(NetMulticast, reliable)
 	void KillCharacter();
 
+	UFUNCTION(NetMulticast, reliable)
+	void DeleteWeapon();
 	UFUNCTION()
 	void OnRep_Direction();
 

@@ -20,6 +20,20 @@ void UWDWeaponComponent::BeginPlay()
 	SpawnWeapon();
 }
 
+void UWDWeaponComponent::BeginDestroy()
+{
+	DestroyWeapon();
+	Super::BeginDestroy();
+}
+void UWDWeaponComponent::DestroyWeapon()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Destroying"));
+	if (CurrentWeapon)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Destroyed"));
+		CurrentWeapon->Destroy();
+	}
+}
 
 void UWDWeaponComponent::SpawnWeapon()
 {
@@ -70,7 +84,7 @@ void UWDWeaponComponent::Fire()
 	CurrentWeapon->Fire();
 }
 void UWDWeaponComponent::Detach() {
-	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	 CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	 CurrentWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	 CurrentWeapon->GetMesh()->SetAllBodiesSimulatePhysics(true);
 	 CurrentWeapon->GetMesh()->SetEnablePhysicsBlending(true);

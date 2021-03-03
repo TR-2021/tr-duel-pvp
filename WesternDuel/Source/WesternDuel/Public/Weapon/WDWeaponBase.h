@@ -38,7 +38,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void BeginDestroy() override;
 	virtual void Tick(float DeltaSeconds) override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UPROPERTY(EditDefaultsOnly, replicated,Category = "Weapon")
@@ -52,7 +54,7 @@ protected:
 	
 	UPROPERTY()
 	AWDCrosshairActor* Crosshair;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool ShouldDrawCrosshair = true;
 
 public:
@@ -71,6 +73,7 @@ public:
 	UFUNCTION()
 	void SetCrosshairDrawing(bool IsDrawing);
 
+	AWDCrosshairActor* GetCrosshair() { return Crosshair; }
 
 private:
 	void DecreaseAmmoBy(int32 Num);
