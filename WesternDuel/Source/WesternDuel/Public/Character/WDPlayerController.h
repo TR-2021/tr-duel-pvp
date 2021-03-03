@@ -15,6 +15,8 @@ class WESTERNDUEL_API AWDPlayerController : public APlayerController
 	GENERATED_BODY()
 protected:
 	virtual void BeginPlay() override;
+	void OnRestartRound();
+	void OnGameOver();
 public:
 	AWDPlayerController();
 

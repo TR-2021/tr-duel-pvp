@@ -9,6 +9,7 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDGameStateBase, CurrentRound);
+	DOREPLIFETIME(AWDGameStateBase, bIsGameOver);
 }
 
 
@@ -28,13 +29,25 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 	if (!CurrentGameMode) return;
 
 	CurrentRound++;
+	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
 
 	if (CurrentRound > CurrentGameMode->GetMaxRounds())
 	{
-		// STOP GAME
+		bIsGameOver = true;
+		OnRep_GameOver();			// Call implicitly to trigger event on Server
 	}
 	else
 	{
 		CurrentGameMode->RestartRound();
 	}
+}
+
+void AWDGameStateBase::OnRep_RoundChanged()
+{
+	OnRoundChanged.Broadcast();
+}
+
+void AWDGameStateBase::OnRep_GameOver()
+{
+	OnGameOver.Broadcast();
 }

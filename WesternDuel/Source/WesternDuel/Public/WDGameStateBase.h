@@ -9,21 +9,32 @@
 /**
  * 
  */
+DECLARE_MULTICAST_DELEGATE(FGameStateEventSignature)
 UCLASS()
 class WESTERNDUEL_API AWDGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing=OnRep_RoundChanged)
 	int32 CurrentRound = 1;
 
+	UPROPERTY(ReplicatedUsing=OnRep_GameOver)
+	bool bIsGameOver = false;
+
 	FTimerHandle Timer;
-
-
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+	
+	UFUNCTION()
+	void OnRep_RoundChanged();
+	
+	UFUNCTION()
+	void OnRep_GameOver();
 
 public:
+	FGameStateEventSignature OnRoundChanged;
+	FGameStateEventSignature OnGameOver;
+	
 	int32 GetCurrentRound() { return CurrentRound; };
 	
 	UFUNCTION(Server, Reliable)
@@ -31,6 +42,5 @@ public:
 	
 	UFUNCTION(Server, Reliable)
 	void OnChangeRound();
-
 
 };

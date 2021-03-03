@@ -33,8 +33,9 @@ protected:
 
 	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-	virtual void Logout(AController* Exiting) ;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
+	virtual void Logout(AController* Exiting);
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 
@@ -46,9 +47,8 @@ protected:
 	void RemoveAllActorsByClass();
 public:
 	AWDGameModeBase();
+
 	int32 GetMaxRounds() { return MaxRounds; }
-
-
 	void RestartRound();
 };
 

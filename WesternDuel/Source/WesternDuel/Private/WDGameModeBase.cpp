@@ -23,8 +23,27 @@ void AWDGameModeBase::PreLogin(const FString& Options, const FString& Address, c
 
 void AWDGameModeBase::PostLogin(APlayerController* NewPlayer) {
 	Super::PostLogin(NewPlayer);
+
 	AWDPlayerController* NewPlayerController = Cast<AWDPlayerController>(NewPlayer);
-	UE_LOG(LogTemp, Warning, TEXT("Pausing %s"),*NewPlayerController->GetName());
+	if (!NewPlayerController) return;
+
+
+	SetPause(NewPlayerController);
+	Players.Add(NewPlayerController);
+	if (Players.Num() == MaxPlayers)
+	{
+		ClearPause();
+	}
+}
+
+void AWDGameModeBase::HandleSeamlessTravelPlayer(AController*& NewPlayer)
+{
+	Super::HandleSeamlessTravelPlayer(NewPlayer);
+
+	AWDPlayerController* NewPlayerController = Cast<AWDPlayerController>(NewPlayer);
+	if (!NewPlayerController) return;
+
+
 	SetPause(NewPlayerController);
 	Players.Add(NewPlayerController);
 	if (Players.Num() == MaxPlayers)
@@ -35,6 +54,11 @@ void AWDGameModeBase::PostLogin(APlayerController* NewPlayer) {
 
 void AWDGameModeBase::Logout(AController* Exiting) {
 	Super::Logout(Exiting);
+	AWDPlayerController* NewPlayerController = Cast<AWDPlayerController>(Exiting);
+	if (!NewPlayerController) return;
+
+	Players.Remove(NewPlayerController);
+	Exiting->Destroy();
 }
 
 
@@ -54,15 +78,16 @@ void AWDGameModeBase::HandleStartingNewPlayer_Implementation(APlayerController* 
 
 void AWDGameModeBase::RestartRound()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Red, "REstart ");
 	for (auto Player : Players)
 	{
 		if (Player && Player->GetPawn())
 		{
-			Player->UnPossess();
+			Player->GetPawn()->Reset();
 		}
+
 	}
 	ClearWorld();
-
 	for (auto Player : Players)
 	{
 		RestartPlayer(Player);
@@ -74,5 +99,4 @@ void AWDGameModeBase::ClearWorld()
 {
 	RemoveAllActorsByClass<AWD_BaseCharacter>();
 	RemoveAllActorsByClass<AWDWeaponBase>();
-	RemoveAllActorsByClass<AWDCrosshairActor>();
 }
