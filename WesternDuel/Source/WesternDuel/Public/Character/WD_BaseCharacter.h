@@ -40,12 +40,18 @@ protected:
 	UWDHealthComponent* HealthComponent;
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Player")
-	bool GunIsTaken = false;
+	bool bGunIsTaken = false;
+	
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=OnRep_CanAim, Category = "Player")
+	bool bCanAim = false;
 	
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Player")
-	bool IsAiming = false;
+	bool bIsAiming = false;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_Direction)
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Player")
+	bool bIsAutoAim= false;
+
+	UPROPERTY(Replicated)
 	float InputDirection = 0;
 	
 	UPROPERTY(Replicated)
@@ -60,10 +66,10 @@ public:
 	float GetMovementDirection();
 	
 	UFUNCTION(BlueprintCallable)
-	bool HasGunTaken() { return GunIsTaken; }
+	bool HasGunTaken() { return bGunIsTaken; }
 
 	UFUNCTION(BlueprintCallable)
-	bool IsAim() { return IsAiming; };
+	bool IsAim() { return bIsAiming; };
 	
 	UFUNCTION(BlueprintCallable)
 	FRotator GetAimDirection();
@@ -71,6 +77,11 @@ public:
 	UFUNCTION(Server, unreliable)
 	void UpdateAimDirection(FRotator ClientAimRotation);
 
+	UFUNCTION(Server, reliable)
+	void Server_SetCanAim(bool bCan);
+
+
+	
 	UFUNCTION(BlueprintCallable)
 	UWDHealthComponent* GetHealthComponent() { return HealthComponent; };
 
@@ -99,10 +110,8 @@ private:
 	UFUNCTION(Server, reliable)
 	void Server_RequestPutBackGun();
 
-
 	UFUNCTION(NetMulticast, reliable)
 	void PutBackGun();
-	
 	
 	UFUNCTION(Server, reliable)
 	void Server_StartAim();
@@ -112,14 +121,13 @@ private:
 	
 	UFUNCTION()
 	void OnDie(AController* KilledBy);
-	
 
 	UFUNCTION(NetMulticast, reliable)
 	void KillCharacter();
 
 	UFUNCTION(NetMulticast, reliable)
 	void DeleteWeapon();
+	
 	UFUNCTION()
-	void OnRep_Direction();
-
+	void OnRep_CanAim();
 };

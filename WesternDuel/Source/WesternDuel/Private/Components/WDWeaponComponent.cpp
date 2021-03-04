@@ -27,10 +27,8 @@ void UWDWeaponComponent::BeginDestroy()
 }
 void UWDWeaponComponent::DestroyWeapon()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Destroying"));
 	if (CurrentWeapon)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Destroyed"));
 		CurrentWeapon->Destroy();
 	}
 }

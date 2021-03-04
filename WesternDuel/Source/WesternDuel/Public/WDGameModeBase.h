@@ -18,20 +18,16 @@ class WESTERNDUEL_API AWDGameModeBase : public AGameModeBase
 protected:
 
 	int32 MaxPlayers = 2;
-	int32 MaxRounds = 6;
+	int32 MaxRounds = 3;
 
 	TArray<AWDPlayerController*> Players;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<AWD_BaseCharacter>> PlayerPawns;
-	
-	UPROPERTY(EditDefaultsOnly)
-	int32 TotalNumberOfRounds = 3;
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 CurrentRound = 0;
 
-	virtual void PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage) override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
@@ -42,6 +38,9 @@ protected:
 	// Delete Unpossessed Pawn and Its guns
 	UFUNCTION()
 	void ClearWorld();
+	
+	UFUNCTION()
+	void HandleNewPLayer(APlayerController* NewPlayer);
 
 	template <class T >
 	void RemoveAllActorsByClass();

@@ -5,6 +5,7 @@
 
 
 void AWDMainMenuPlayerController::BeginPlay() {
+	Super::BeginPlay();
 	SetInputMode(FInputModeUIOnly());
 	bShowMouseCursor = true;
 };

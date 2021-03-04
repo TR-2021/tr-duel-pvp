@@ -16,5 +16,5 @@ class WESTERNDUEL_API AWDLobbyPlayerController : public APlayerController
 protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	virtual void PreClientTravel(const FString& PendingURL, ETravelType TravelType, bool bIsSeamlessTravel);
 };

@@ -25,9 +25,12 @@ void UWDLobbyWidget::NativeOnInitialized()
 
 void UWDLobbyWidget::StartGame()
 {
-	FString URL = "/Game/Content/Maps/map_office?game=/Game/Blueprints/GameModes/TDMGM_BP.TDMGM_BP_C?listen";
 	GetWorld()->ServerTravel("/Game/Levels/Game/MainLevel?game=/Game/World/BP_MyWDGameModeBase.BP_MyWDGameModeBase_C?Listen");
-	
+	UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
+	if (ViewportClient)
+	{
+		ViewportClient->RemoveAllViewportWidgets();
+	}
 }
 
 void UWDLobbyWidget::UpdatePlayers(TArray<FString> Players)

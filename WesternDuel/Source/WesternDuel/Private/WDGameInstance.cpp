@@ -8,6 +8,7 @@
 
 void UWDGameInstance::Init()
 {
+	Super::Init();
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem != nullptr)
 	{

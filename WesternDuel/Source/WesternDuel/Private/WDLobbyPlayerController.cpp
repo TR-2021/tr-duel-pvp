@@ -14,5 +14,16 @@ void AWDLobbyPlayerController::BeginPlay() {
 
 };
 void AWDLobbyPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason) {
-
+	Super::EndPlay(EndPlayReason);
 };
+
+
+void AWDLobbyPlayerController::PreClientTravel(const FString& PendingURL, ETravelType TravelType, bool bIsSeamlessTravel)
+{
+	UGameViewportClient* ViewportClient = GetWorld()->GetGameViewport();
+	if (ViewportClient)
+	{
+		ViewportClient->RemoveAllViewportWidgets();
+	}
+	Super::PreClientTravel(PendingURL, TravelType, bIsSeamlessTravel);
+}

@@ -15,8 +15,7 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 
 void AWDGameStateBase::NextRound_Implementation()
 {
-	
-	// TODO Replace lambda function with function
+	EndRound();
 	GetWorld()->GetTimerManager().SetTimer(Timer,this,&AWDGameStateBase::OnChangeRound, 2, false, 2);
 }
 
@@ -30,7 +29,6 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 
 	CurrentRound++;
 	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
-
 	if (CurrentRound > CurrentGameMode->GetMaxRounds())
 	{
 		bIsGameOver = true;
@@ -38,6 +36,7 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 	}
 	else
 	{
+	
 		CurrentGameMode->RestartRound();
 	}
 }
@@ -45,9 +44,24 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 void AWDGameStateBase::OnRep_RoundChanged()
 {
 	OnRoundChanged.Broadcast();
+	StartRound();
 }
 
 void AWDGameStateBase::OnRep_GameOver()
 {
 	OnGameOver.Broadcast();
+}
+
+
+void AWDGameStateBase::StartRound_Implementation()
+{
+	GetWorld()->GetTimerManager().SetTimer(Timer, 
+	[&]() {
+		OnRoundStart.Broadcast();
+	}, 4, false, 4);
+}
+
+void AWDGameStateBase::EndRound_Implementation()
+{
+	OnRoundEnd.Broadcast();
 }

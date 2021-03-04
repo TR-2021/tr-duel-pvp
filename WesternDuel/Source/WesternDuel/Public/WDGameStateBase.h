@@ -32,7 +32,9 @@ protected:
 	void OnRep_GameOver();
 
 public:
-	FGameStateEventSignature OnRoundChanged;
+	FGameStateEventSignature OnRoundStart;		// Called when players can shoot
+	FGameStateEventSignature OnRoundEnd;		// Called when Someone died
+	FGameStateEventSignature OnRoundChanged;	// Called After End and before Start
 	FGameStateEventSignature OnGameOver;
 	
 	int32 GetCurrentRound() { return CurrentRound; };
@@ -40,7 +42,14 @@ public:
 	UFUNCTION(Server, Reliable)
 	void NextRound();
 	
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void OnChangeRound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void StartRound();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void EndRound();
+
 
 };
