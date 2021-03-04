@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "UI/WDGameHUD.h"
+
 #include "WDPlayerController.generated.h"
 
 /**
  * 
  */
-
 UCLASS()
 class WESTERNDUEL_API AWDPlayerController : public APlayerController
 {
@@ -23,6 +24,10 @@ protected:
 	void OnGameOver();
 public:
 	AWDPlayerController();
-private:
+	virtual void SetupInputComponent() override;
 
+private:
+	EHUDState PrevHUDState = EHUDState::NONE;
+
+	void OnPausePressed();
 };

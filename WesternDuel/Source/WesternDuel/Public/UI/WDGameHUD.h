@@ -9,6 +9,16 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EHUDState :uint8
+{
+	NONE,
+	ROUND_END,
+	GAMEOVER,
+	PAUSE,
+	MAX
+};
+
 class UWDGameOverWidget;
 class UWDRoundResultWidget;
 UCLASS()
@@ -25,24 +35,26 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
-private:
-
-	UPROPERTY()
-	UWDRoundResultWidget* RoundResultWidget;
-
-	UPROPERTY()
-	UWDGameOverWidget* GameOverWidget;
-
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UUserWidget> PauseWidgetClass;
 
 public:
 	UFUNCTION()
 	void UpdatePlayerInfo();
 	
 	UFUNCTION()
-	void ShowGameOverMenu();
+	void SetState(EHUDState State);
 
-	UFUNCTION()
-	void ShowRoundResultMenu();
+	EHUDState GetHUDState() { return HUDState; };
+	void InitAll();
 	void HideAll();
+
+private:
+	EHUDState HUDState = EHUDState::NONE;
+
+	TMap<EHUDState, UUserWidget*> HUDWidgetMap;
+
+	void SetStateVisibility(EHUDState State);
+
 
 };

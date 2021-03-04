@@ -11,6 +11,12 @@ AWDPlayerController::AWDPlayerController()
 	bReplicates = true;
 }
 
+void AWDPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	InputComponent->BindAction("Pause", EInputEvent::IE_Pressed, this, &AWDPlayerController::OnPausePressed);
+}
+
 void AWDPlayerController::BeginPlay() 
 {
 	Super::BeginPlay();
@@ -51,7 +57,7 @@ void AWDPlayerController::OnEndRound()
 	if (!GameHUD) return;
 
 	UE_LOG(LogTemp, Warning, TEXT("Round End"));
-	GameHUD->ShowRoundResultMenu();
+	GameHUD->SetState(EHUDState::ROUND_END);
 }
 
 void AWDPlayerController::OnGameOver()
@@ -60,8 +66,28 @@ void AWDPlayerController::OnGameOver()
 	if (!GameHUD) return;
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over"));
-	GameHUD->ShowGameOverMenu();
+	GameHUD->SetState(EHUDState::GAMEOVER);
 
 	DisableInput(this);
 	SetInputMode(FInputModeUIOnly());
+}
+
+void AWDPlayerController::OnPausePressed()
+{
+	auto GameHUD = GetHUD<AWDGameHUD>();
+	if (!GameHUD) return;
+
+	EHUDState CurrentState = GameHUD->GetHUDState();
+	if (CurrentState == EHUDState::PAUSE)
+	{
+		GameHUD->SetState(PrevHUDState);
+		PrevHUDState = CurrentState;
+	}
+	else
+	{
+		PrevHUDState = CurrentState;
+		GameHUD->SetState(EHUDState::PAUSE);
+	}
+
+
 }

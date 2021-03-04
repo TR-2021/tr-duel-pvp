@@ -4,6 +4,8 @@
 #include "UI/WDGameHUD.h"
 #include "UI/WDGameOverWidget.h"
 #include "UI/WDRoundResultWidget.h"
+#include "UI/WDGamePauseWidget.h"
+
 #include "Character/WDGamePlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,21 +14,30 @@
 void AWDGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
-	if (RoundResultWidgetClass)
-	{
-		RoundResultWidget = CreateWidget<UWDRoundResultWidget>(GetWorld(), RoundResultWidgetClass);
-		if (RoundResultWidget) RoundResultWidget->AddToViewport();
-	}
-
-	if (GameOverWidgetClass)
-	{
-		GameOverWidget = CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass);
-		if (GameOverWidget) GameOverWidget->AddToViewport();
-	}
-
+	HUDWidgetMap.Add(EHUDState::ROUND_END, CreateWidget<UWDRoundResultWidget>(GetWorld(), RoundResultWidgetClass));
+	HUDWidgetMap.Add(EHUDState::GAMEOVER, CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass));
+	HUDWidgetMap.Add(EHUDState::PAUSE, CreateWidget<UWDGamePauseWidget>(GetWorld(), PauseWidgetClass));
+	InitAll();
 	HideAll();
 }
 
+
+void AWDGameHUD::SetState(EHUDState State)
+{
+	HUDState = State;
+	switch (State)
+	{
+	case EHUDState::NONE:
+		HideAll();
+		break;
+	case EHUDState::GAMEOVER:
+		UpdatePlayerInfo();
+	default:
+		SetStateVisibility(State);
+		break;
+	}
+	SetStateVisibility(State);
+}
 
 
 void AWDGameHUD::UpdatePlayerInfo()
@@ -37,47 +48,55 @@ void AWDGameHUD::UpdatePlayerInfo()
 		auto PlayerState = Cast< AWDGamePlayerState>(LocalController->PlayerState);
 		if (PlayerState)
 		{
-			GameOverWidget->SetKills(PlayerState->GetKills());
-			GameOverWidget->SetDeaths(PlayerState->GetDeaths());
+			auto GameOverWidget = Cast< UWDGameOverWidget>(HUDWidgetMap[EHUDState::GAMEOVER]);
+			if (GameOverWidget)
+			{
+				GameOverWidget->SetKills(PlayerState->GetKills());
+				GameOverWidget->SetDeaths(PlayerState->GetDeaths());
+			}
+		}
+	}
+}
+
+void AWDGameHUD::SetStateVisibility(EHUDState State)
+{
+	if (HUDWidgetMap.Contains(State))
+	{
+		UUserWidget* Widget = HUDWidgetMap[State];
+		if (Widget)
+		{
+			HideAll();
+			Widget->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
 }
 
 
-void AWDGameHUD::ShowGameOverMenu()
+void AWDGameHUD::InitAll()
 {
-	if (RoundResultWidget)
+	for (auto MapPair : HUDWidgetMap)
 	{
-		RoundResultWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (GameOverWidget)
-	{
-		UpdatePlayerInfo();
-		GameOverWidget->SetVisibility(ESlateVisibility::Visible);
+		UUserWidget* Widget = MapPair.Value;
+		if (Widget)
+		{
+			Widget->AddToViewport();
+		}
 	}
 }
-
-void AWDGameHUD::ShowRoundResultMenu()
-{
-	if (RoundResultWidget)
-	{
-		RoundResultWidget->SetVisibility(ESlateVisibility::Visible);
-	}
-	if (GameOverWidget)
-	{
-		GameOverWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
-}
-
 
 void AWDGameHUD::HideAll()
 {
-	if (RoundResultWidget)
+	for (auto MapPair : HUDWidgetMap)
 	{
-		RoundResultWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
-	if (GameOverWidget)
-	{
-		GameOverWidget->SetVisibility(ESlateVisibility::Hidden);
+		UUserWidget* Widget = MapPair.Value;
+		if (Widget)
+		{
+			UE_LOG(LogTemp, Error, TEXT("OK"));
+			Widget->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("NOT OK"));
+		}
 	}
 }
