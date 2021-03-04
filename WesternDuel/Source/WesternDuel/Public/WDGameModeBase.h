@@ -11,29 +11,35 @@
  */
 class AWDPlayerController;
 class AWD_BaseCharacter;
+
 UCLASS()
 class WESTERNDUEL_API AWDGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 protected:
 
+	UPROPERTY(EditDefaultsOnly)
 	int32 MaxPlayers = 2;
+	
+	UPROPERTY(EditDefaultsOnly)
 	int32 MaxRounds = 3;
+	
+	int32 CurrentRound = 1;
 
 	TArray<AWDPlayerController*> Players;
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<AWD_BaseCharacter>> PlayerPawns;
 
-	UPROPERTY(EditDefaultsOnly)
-	int32 CurrentRound = 0;
-
+	virtual void StartPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
 
 	virtual void Logout(AController* Exiting);
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+
+	//virtual AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName) override;
 
 	// Delete Unpossessed Pawn and Its guns
 	UFUNCTION()
@@ -42,13 +48,15 @@ protected:
 	UFUNCTION()
 	void HandleNewPLayer(APlayerController* NewPlayer);
 
+
 	template <class T >
 	void RemoveAllActorsByClass();
 public:
 	AWDGameModeBase();
 
 	int32 GetMaxRounds() { return MaxRounds; }
-	void RestartRound();
+	int32 GetMaxPlayers() { return MaxPlayers; }
+	void RestartRound(int32 NextRound);
 };
 
 template<class T>

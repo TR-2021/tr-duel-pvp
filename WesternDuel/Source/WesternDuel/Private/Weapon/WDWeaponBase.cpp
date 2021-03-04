@@ -3,6 +3,7 @@
 
 #include "Weapon/WDWeaponBase.h"
 #include "Weapon/WDProjectTileActor.h"
+#include "Character/WD_BaseCharacter.h"
 #include "UI/WDCrosshairActor.h"
 #include "Net/UnrealNetwork.h"
 #include "DrawDebugHelpers.h"
@@ -54,11 +55,17 @@ void AWDWeaponBase::Fire_Implementation()
 		//Fire
 		DecreaseAmmoBy(1);
 		//Spawn ProjectTile
+		
 		FTransform ProjectileTransform = FTransform(FRotator::ZeroRotator, GetMuzzleLocation());
-		auto ProjectTile = GetWorld()->SpawnActorDeferred<AWDProjectTileActor>(CurrentWeaponData.ProjectileClass, ProjectileTransform, GetOwner());
-		ProjectTile->SetShotDirection(GetActorForwardVector());
-		ProjectTile->SetOwner(GetOwner());
-		ProjectTile->FinishSpawning(ProjectileTransform);
+		
+		auto ShotCharacter = Cast<ACharacter>(GetOwner());		// here is may be BUG if weaponComponent was not attached to Character
+		if (ShotCharacter)
+		{
+			auto ProjectTile = GetWorld()->SpawnActorDeferred<AWDProjectTileActor>(CurrentWeaponData.ProjectileClass, ProjectileTransform, GetOwner());
+			ProjectTile->SetShotDirection(GetActorForwardVector());
+			ProjectTile->SetShotController(ShotCharacter->GetController());
+			ProjectTile->FinishSpawning(ProjectileTransform);
+		}
 	}
 }
 
@@ -68,6 +75,10 @@ bool AWDWeaponBase::IsEmpty()
 }
 void AWDWeaponBase::DecreaseAmmoBy(int32 Num) {
 	CurrentWeaponData.CurrentBullets = FMath::Clamp<int32>(CurrentWeaponData.CurrentBullets-Num,0, CurrentWeaponData.MaxBullets);
+	if (IsEmpty())
+	{
+		OnEmpty.Broadcast();
+	}
 }
 FVector AWDWeaponBase::GetMuzzleLocation() {
 	return SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName);

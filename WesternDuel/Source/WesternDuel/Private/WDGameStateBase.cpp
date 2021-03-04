@@ -10,14 +10,35 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDGameStateBase, CurrentRound);
 	DOREPLIFETIME(AWDGameStateBase, bIsGameOver);
+	DOREPLIFETIME(AWDGameStateBase, EmptyPlayersCount);
 }
 
 
 void AWDGameStateBase::NextRound_Implementation()
 {
 	EndRound();
-	GetWorld()->GetTimerManager().SetTimer(Timer,this,&AWDGameStateBase::OnChangeRound, 2, false, 2);
+	GetWorld()->GetTimerManager().SetTimer(Timer,this,&AWDGameStateBase::OnChangeRound, DelayOnEndRound, false);
 }
+
+
+void AWDGameStateBase::NotifyEmpty_Implementation()
+{
+	if (!GetWorld()) return;
+
+	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	if (!CurrentGameMode) return;
+
+	EmptyPlayersCount++;
+
+	if (EmptyPlayersCount >= CurrentGameMode->GetMaxPlayers())
+	{
+		GetWorld()->GetTimerManager().SetTimer(Timer,[&]() {
+				NextRound();
+		}, DelayOnEmpty, false);
+	}
+}
+
+
 
 void AWDGameStateBase::OnChangeRound_Implementation()
 {
@@ -28,6 +49,7 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 	if (!CurrentGameMode) return;
 
 	CurrentRound++;
+	EmptyPlayersCount = 0;			// All Players have bullets at start of round
 	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
 	if (CurrentRound > CurrentGameMode->GetMaxRounds())
 	{
@@ -36,8 +58,7 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 	}
 	else
 	{
-	
-		CurrentGameMode->RestartRound();
+		CurrentGameMode->RestartRound(CurrentRound);
 	}
 }
 
@@ -58,7 +79,7 @@ void AWDGameStateBase::StartRound_Implementation()
 	GetWorld()->GetTimerManager().SetTimer(Timer, 
 	[&]() {
 		OnRoundStart.Broadcast();
-	}, 4, false, 4);
+	}, DelayOnStartRound, false);
 }
 
 void AWDGameStateBase::EndRound_Implementation()

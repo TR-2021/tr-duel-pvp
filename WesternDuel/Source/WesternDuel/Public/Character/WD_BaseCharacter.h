@@ -130,4 +130,6 @@ private:
 	
 	UFUNCTION()
 	void OnRep_CanAim();
+
+
 };

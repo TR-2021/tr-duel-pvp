@@ -6,30 +6,43 @@
 #include "GameFramework/GameStateBase.h"
 #include "WDGameStateBase.generated.h"
 
-/**
- * 
- */
 DECLARE_MULTICAST_DELEGATE(FGameStateEventSignature)
+
 UCLASS()
 class WESTERNDUEL_API AWDGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
 
 protected:
+	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+
 	UPROPERTY(ReplicatedUsing=OnRep_RoundChanged)
 	int32 CurrentRound = 1;
 
 	UPROPERTY(ReplicatedUsing=OnRep_GameOver)
 	bool bIsGameOver = false;
 
+	UPROPERTY()
+	float DelayOnEmpty = 4;	// Seconds; Delay for next round if All players has no bullets
+
+	UPROPERTY()
+	float DelayOnEndRound = 2;	// Seconds; How many seconds between EndRound and RestartRound
+
+
+	UPROPERTY()
+	float DelayOnStartRound = 4;	// Seconds; Delay before can shoot
+
+	UPROPERTY(Replicated)
+	int32 EmptyPlayersCount= 0;		// Count how many players has no ammo
+
 	FTimerHandle Timer;
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 	
 	UFUNCTION()
 	void OnRep_RoundChanged();
 	
 	UFUNCTION()
 	void OnRep_GameOver();
+
 
 public:
 	FGameStateEventSignature OnRoundStart;		// Called when players can shoot
@@ -51,5 +64,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void EndRound();
 
-
+	UFUNCTION(Server, Reliable)
+	void NotifyEmpty();
 };

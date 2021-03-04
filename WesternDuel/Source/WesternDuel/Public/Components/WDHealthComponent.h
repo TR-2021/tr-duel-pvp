@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "WDHealthComponent.generated.h"
 
+class UCameraShakeBase;
+
 DECLARE_MULTICAST_DELEGATE_OneParam(FHealthOnDieSignature, AController*)
 DECLARE_MULTICAST_DELEGATE_OneParam(FHealthOnChangedSignature, float);
 
@@ -39,6 +41,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Health")
 	FHealthData HealthData;
 
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	TSubclassOf<UCameraShakeBase> CameraShake;
+	
 	void SetHealth(float Health);
 
 public:
@@ -47,4 +52,8 @@ public:
 	bool IsDead();
 	UFUNCTION(BlueprintCallable)
 	float GetHealth();
+
+private:
+	UFUNCTION(Client, Reliable)
+	void PlayCameraShake();
 };

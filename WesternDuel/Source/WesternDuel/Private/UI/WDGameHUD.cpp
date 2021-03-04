@@ -4,6 +4,8 @@
 #include "UI/WDGameHUD.h"
 #include "UI/WDGameOverWidget.h"
 #include "UI/WDRoundResultWidget.h"
+#include "Character/WDGamePlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -12,20 +14,14 @@ void AWDGameHUD::BeginPlay()
 	Super::BeginPlay();
 	if (RoundResultWidgetClass)
 	{
-
 		RoundResultWidget = CreateWidget<UWDRoundResultWidget>(GetWorld(), RoundResultWidgetClass);
 		if (RoundResultWidget) RoundResultWidget->AddToViewport();
-		FString s = "I Am " + FString::FromInt(GetLocalRole()) + " RoundWidget created";
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *s);
 	}
 
 	if (GameOverWidgetClass)
 	{
-
 		GameOverWidget = CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass);
 		if (GameOverWidget) GameOverWidget->AddToViewport();
-		FString s = "I Am " + FString::FromInt(GetLocalRole()) + " GAMEOVer created";
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *s);
 	}
 
 	HideAll();
@@ -35,7 +31,16 @@ void AWDGameHUD::BeginPlay()
 
 void AWDGameHUD::UpdatePlayerInfo()
 {
-	
+	auto LocalController = Cast<AController>(GetOwner());
+	if (LocalController)
+	{
+		auto PlayerState = Cast< AWDGamePlayerState>(LocalController->PlayerState);
+		if (PlayerState)
+		{
+			GameOverWidget->SetKills(PlayerState->GetKills());
+			GameOverWidget->SetDeaths(PlayerState->GetDeaths());
+		}
+	}
 }
 
 
@@ -44,14 +49,11 @@ void AWDGameHUD::ShowGameOverMenu()
 	if (RoundResultWidget)
 	{
 		RoundResultWidget->SetVisibility(ESlateVisibility::Hidden);
-		UE_LOG(LogTemp, Warning, TEXT("Round Hidden"));
-
 	}
 	if (GameOverWidget)
 	{
+		UpdatePlayerInfo();
 		GameOverWidget->SetVisibility(ESlateVisibility::Visible);
-		UE_LOG(LogTemp, Warning, TEXT("GameOVer Shown"));
-
 	}
 }
 

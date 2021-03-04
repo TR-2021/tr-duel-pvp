@@ -2,8 +2,8 @@
 
 
 #include "Components/WDHealthComponent.h"
+#include "Camera/CameraShake.h"
 #include "Net/UnrealNetwork.h"
-
 
 UWDHealthComponent::UWDHealthComponent()
 {
@@ -25,7 +25,7 @@ void UWDHealthComponent::BeginPlay()
 void UWDHealthComponent::OnAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (IsDead()) return;
-
+	PlayCameraShake();
 	SetHealth(HealthData.CurrentHealth - Damage);
 	if (IsDead())
 	{
@@ -52,3 +52,17 @@ void UWDHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(UWDHealthComponent, HealthData);
 }
 
+void UWDHealthComponent::PlayCameraShake_Implementation()
+{
+	if (IsDead()) return;
+
+	const auto Player = Cast<APawn>(GetOwner());
+	if (!Player) return;
+
+	const auto Controller = Player->GetController<APlayerController>();
+	if (!Controller) return;
+
+	if(CameraShake)
+	Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+
+}

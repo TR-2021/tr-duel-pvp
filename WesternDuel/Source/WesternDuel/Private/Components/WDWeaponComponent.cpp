@@ -5,6 +5,7 @@
 #include "Weapon/WDWeaponBase.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "WDGameStateBase.h"
 
 // Sets default values for this component's properties
 UWDWeaponComponent::UWDWeaponComponent()
@@ -42,10 +43,20 @@ void UWDWeaponComponent::SpawnWeapon()
 
 	CurrentWeapon = GetWorld()->SpawnActor<AWDWeaponBase>(WeaponClass);
 	if (!CurrentWeapon) return;
-
+	CurrentWeapon->OnEmpty.AddUObject(this, &UWDWeaponComponent::OnEmptyGun);
 	CurrentWeapon->SetOwner(GetOwner());
 	HolstersWeapon();					// Put gun in holster
 
+}
+
+void UWDWeaponComponent::OnEmptyGun()
+{
+	if (!GetWorld()) return;
+
+	auto CurrentGameState = GetWorld()->GetGameState<AWDGameStateBase>();
+	if (!CurrentGameState) return;
+
+	CurrentGameState->NotifyEmpty();
 }
 void UWDWeaponComponent::AttachWeaponTo(AWDWeaponBase* Weapon, USceneComponent* Mesh, FName SocketName)
 {

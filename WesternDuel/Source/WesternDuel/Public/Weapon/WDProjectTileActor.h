@@ -42,10 +42,16 @@ protected:
 	FVector ShotDirection;
 
 	UPROPERTY()
-	float LifeSpan=3 ;
+	AController* ShotController;
+
+	UPROPERTY()
+	float LifeSpan=3;
+
+
 
 public:	
 	void SetShotDirection(FVector Vector);
+	void SetShotController(AController* Controller);
 	void SetLifeTime(float Time);
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);

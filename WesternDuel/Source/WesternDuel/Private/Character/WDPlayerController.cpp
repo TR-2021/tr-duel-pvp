@@ -61,4 +61,7 @@ void AWDPlayerController::OnGameOver()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game Over"));
 	GameHUD->ShowGameOverMenu();
+
+	DisableInput(this);
+	SetInputMode(FInputModeUIOnly());
 }

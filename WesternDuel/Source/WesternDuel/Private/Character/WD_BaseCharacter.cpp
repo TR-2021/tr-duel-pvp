@@ -4,6 +4,7 @@
 #include "Character/WD_BaseCharacter.h"
 #include "WDGameStateBase.h"
 #include "Character/WDPlayerController.h"
+#include "Character/WDGamePlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -99,7 +100,6 @@ FRotator AWD_BaseCharacter::GetAimDirection()
 {
 	FRotator AimDiff = GetAimOffsets();
 	AimDiff.Yaw = UKismetMathLibrary::NormalizeAxis(AimDiff.Yaw);
-	//GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Blue, AimDiff.ToString() + "  " + FString::FromInt(GetLocalRole()));
 	return AimDiff;
 }
 void AWD_BaseCharacter::UpdateAimDirection_Implementation(FRotator ClientAimRotation)
@@ -140,7 +140,8 @@ void AWD_BaseCharacter::LookAround(float Value)
 void AWD_BaseCharacter::Server_TryFire_Implementation()
 {
 	if (!WeaponComponent) return;
-	WeaponComponent->Fire();
+	if(bGunIsTaken)
+		WeaponComponent->Fire();
 }
 
 
@@ -193,6 +194,16 @@ void AWD_BaseCharacter::OnRep_CanAim()
 // On Server
 void AWD_BaseCharacter::OnDie(AController* KilledBy)
 {
+		auto CurrentPlayerGameState = GetPlayerState<AWDGamePlayerState>();
+		if (CurrentPlayerGameState)
+		{
+			CurrentPlayerGameState->AddDeath(1);
+		}
+		auto KillerPlayerGameState = KilledBy->GetPlayerState<AWDGamePlayerState>();
+		if (KillerPlayerGameState && GetController() != KilledBy)
+		{
+			KillerPlayerGameState->AddKill(1);
+		}
 	KillCharacter();
 	GetWorld()->GetGameState<AWDGameStateBase>()->NextRound();
 }
@@ -232,3 +243,4 @@ void AWD_BaseCharacter::DeleteWeapon_Implementation()
 	WeaponComponent->GetWeapon()->GetCrosshair()->Destroy();
 	WeaponComponent->GetWeapon()->Destroy();
 }
+

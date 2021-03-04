@@ -37,15 +37,21 @@ void AWDProjectTileActor::BeginPlay()
 {
 	Super::BeginPlay();
 	ProjectileMovementComponent->Velocity = ShotDirection * ProjectileMovementComponent->InitialSpeed;
-	SphereCollider->OnComponentHit.AddDynamic(this, &AWDProjectTileActor::OnHit);
 	SphereCollider->bReturnMaterialOnMove = true;
+	if (HasAuthority())
+	{
+		SphereCollider->OnComponentHit.AddDynamic(this, &AWDProjectTileActor::OnHit);
+	}
 	SetLifeSpan(LifeSpan);
-	
 }
 
 void AWDProjectTileActor::SetShotDirection(FVector Vector)
 {
 	ShotDirection = Vector;
+}
+void AWDProjectTileActor::SetShotController(AController* Controller)
+{
+	ShotController = Controller;
 }
 
 void AWDProjectTileActor::SetLifeTime(float Time)
@@ -62,13 +68,12 @@ void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* Other
 	AWD_BaseCharacter* Character = Cast<AWD_BaseCharacter>(OtherActor);
 	if (!Character) return;
 
-	APlayerController* PlayerController =UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	UPhysicalMaterial* PhysMaterial = Hit.PhysMaterial.Get();
-	float ResultDamage = BaseDamage;
-	if (PhysicsDamageMap.Contains(PhysMaterial)) {
-		ResultDamage = PhysicsDamageMap[PhysMaterial];
-	}
-	Character->TakeDamage(ResultDamage, {}, PlayerController, GetOwner());
+		UPhysicalMaterial* PhysMaterial = Hit.PhysMaterial.Get();
+		float ResultDamage = BaseDamage;
+		if (PhysicsDamageMap.Contains(PhysMaterial)) {
+			ResultDamage = PhysicsDamageMap[PhysMaterial];
+		}
+		Character->TakeDamage(ResultDamage, {}, ShotController, this);
 }
 void AWDProjectTileActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

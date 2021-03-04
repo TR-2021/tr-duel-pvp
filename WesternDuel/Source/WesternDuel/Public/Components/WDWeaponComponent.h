@@ -46,5 +46,7 @@ public:
 	void Detach();
 	void SetCrosshairVisibility(bool Visible);
 	void DestroyWeapon();
-
+private:
+	UFUNCTION()
+	void OnEmptyGun();
 };

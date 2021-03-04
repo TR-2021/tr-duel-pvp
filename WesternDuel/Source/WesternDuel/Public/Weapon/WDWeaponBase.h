@@ -8,6 +8,9 @@
 
 class AWDProjectTileActor;
 class AWDCrosshairActor;
+
+DECLARE_MULTICAST_DELEGATE(FWeaponEventSignature)
+
 USTRUCT(BlueprintType)
 struct FWeaponData {
 	GENERATED_USTRUCT_BODY()
@@ -54,10 +57,13 @@ protected:
 	
 	UPROPERTY()
 	AWDCrosshairActor* Crosshair;
+
 	UPROPERTY(Replicated)
 	bool ShouldDrawCrosshair = true;
 
 public:
+	FWeaponEventSignature OnEmpty;
+
 	UFUNCTION(Server, reliable)
 	void Fire();
 
