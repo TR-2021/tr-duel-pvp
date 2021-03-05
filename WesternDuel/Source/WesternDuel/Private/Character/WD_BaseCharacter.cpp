@@ -40,6 +40,7 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 
 	WeaponComponent = CreateDefaultSubobject<UWDWeaponComponent>(TEXT("Weapon"));
 	HealthComponent = CreateDefaultSubobject<UWDHealthComponent>(TEXT("Health"));
+
 	GetCharacterMovement()->bUseControllerDesiredRotation = 0;
 	GetCharacterMovement()->bOrientRotationToMovement = 0;
 }
@@ -54,6 +55,7 @@ void AWD_BaseCharacter::BeginPlay()
 	WeaponComponent->SetIsReplicated(true);
 	GetCapsuleComponent()->SetIsReplicated(true);
 	GetMesh()->SetIsReplicated(true);
+	GetMesh()->SetCollisionProfileName(TEXT("PhysicsBody"));
 	WeaponComponent->SetCrosshairVisibility(IsLocallyControlled());
 	
 }

@@ -3,6 +3,8 @@
 
 #include "WDGameModeBase.h"
 #include "WDGameStateBase.h"
+#include "WDGameInstance.h"
+
 #include "Character/WDPlayerController.h"
 #include "Character/WDGamePlayerState.h"
 #include "Character/WD_BaseCharacter.h"
@@ -22,7 +24,10 @@ AWDGameModeBase::AWDGameModeBase()
 	HUDClass = AWDGameHUD::StaticClass();
 	PlayerStateClass = AWDGamePlayerState::StaticClass();
 }
-
+void AWDGameModeBase::StartPlay()
+{
+	Super::StartPlay();
+}
 
 void AWDGameModeBase::PostLogin(APlayerController* NewPlayer) {
 	Super::PostLogin(NewPlayer);
@@ -66,10 +71,23 @@ void AWDGameModeBase::Logout(AController* Exiting) {
 	Exiting->Destroy();
 }
 
-void AWDGameModeBase::StartPlay()
+void AWDGameModeBase::FinishGame()
 {
-	Super::StartPlay();
+	for (auto Player : Players)
+	{
+		Player->Disconnect();			// Tell all clients to disconnect
+	}
+	// if we are lsiten server. Disconnect local player controller
+	auto GameInstance = GetGameInstance<UWDGameInstance>();
+	if (GameInstance)
+	{
+		GameInstance->DestroySession();
+	}
+	//UGameplayStatics::OpenLevel(GetWorld(), FName(UWDGameInstance::MainMenuLevel));
+	GetWorld()->ServerTravel(UWDGameInstance::MainMenuLevel, true, true);				
 }
+
+
 
 /*
 * Befor restarting round, we should free all PlayerStart

@@ -57,6 +57,7 @@ public:
 	int32 GetMaxRounds() { return MaxRounds; }
 	int32 GetMaxPlayers() { return MaxPlayers; }
 	void RestartRound(int32 NextRound);
+	void FinishGame();
 };
 
 template<class T>

@@ -25,7 +25,8 @@ protected:
 public:
 	AWDPlayerController();
 	virtual void SetupInputComponent() override;
-
+	UFUNCTION(Client,reliable)
+	void Disconnect();
 private:
 	EHUDState PrevHUDState = EHUDState::NONE;
 

@@ -6,9 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "WDProjectTileActor.generated.h"
 
-class UProjectileMovementComponent;
+class UNiagaraSystem;
 class USphereComponent;
 class UStaticMeshComponent;
+class UProjectileMovementComponent;
+
 UCLASS()
 class WESTERNDUEL_API AWDProjectTileActor : public AActor
 {
@@ -38,6 +40,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<UPhysicalMaterial*, float> PhysicsDamageMap;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category="VFX")
+	TArray<UNiagaraSystem*> BloodFX;
+	
 	UPROPERTY(replicated)
 	FVector ShotDirection;
 
@@ -48,11 +53,13 @@ protected:
 	float LifeSpan=3;
 
 
-
 public:	
 	void SetShotDirection(FVector Vector);
 	void SetShotController(AController* Controller);
 	void SetLifeTime(float Time);
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(NetMulticast, Reliable)
+		void SpawnBloodFX(USceneComponent* AttachToComponent, FName AttachPointName,  FRotator Rotation);
 };

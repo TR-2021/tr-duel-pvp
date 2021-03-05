@@ -9,16 +9,27 @@
 void AWDMainMenuHUD::BeginPlay() {
 	Super::BeginPlay();
 	if (MenuWidgetClass) {
-		auto MenuWidget = Cast<UWDMainMenuWidget>(CreateWidget<UUserWidget>(GetWorld(), MenuWidgetClass));
-		MenuWidget->OnJoinRequest.AddUObject(this, &AWDMainMenuHUD::OnJoinRequest);
-		MenuWidget->AddToViewport();
+		MenuWidget = CreateWidget<UWDMainMenuWidget>(GetWorld(), MenuWidgetClass);
+		if (MenuWidget)
+		{
+			MenuWidget->OnJoinRequest.AddUObject(this, &AWDMainMenuHUD::OnJoinRequest);
+			MenuWidget->AddToViewport();
+		}
+	}
+	if (LobbySearchWidgetClass) {
+		LobbyWidget = CreateWidget<UWDLobbySearchWidget>(GetWorld(), LobbySearchWidgetClass);
+		if (LobbyWidget)
+		{
+			LobbyWidget->AddToViewport();
+			LobbyWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
 	}
 }
 
 
 void AWDMainMenuHUD::OnJoinRequest() {
-	if (LobbySearchWidgetClass) {
-		auto LobbyWidget = Cast<UWDLobbySearchWidget>(CreateWidget<UUserWidget>(GetWorld(), LobbySearchWidgetClass));
-		LobbyWidget->AddToViewport();
+	if (LobbyWidget && MenuWidget) {
+		MenuWidget->SetVisibility(ESlateVisibility::Hidden);
+		LobbyWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }

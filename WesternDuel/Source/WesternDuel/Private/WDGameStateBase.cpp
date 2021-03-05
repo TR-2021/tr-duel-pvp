@@ -16,8 +16,12 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 
 void AWDGameStateBase::NextRound_Implementation()
 {
-	EndRound();
-	GetWorld()->GetTimerManager().SetTimer(Timer,this,&AWDGameStateBase::OnChangeRound, DelayOnEndRound, false);
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+		EndRound();
+		GetWorld()->GetTimerManager().SetTimer(Timer, this, &AWDGameStateBase::OnChangeRound, DelayOnEndRound, false);
+	}, DelayAfterDeath, false);
+
+	
 }
 
 

@@ -24,14 +24,18 @@ protected:
 
 	UPROPERTY()
 	float DelayOnEmpty = 4;	// Seconds; Delay for next round if All players has no bullets
+	
+	UPROPERTY()
+	float DelayAfterDeath = 1.1245657564;	// Seconds; Delay before EndRound
 
 	UPROPERTY()
 	float DelayOnEndRound = 2;	// Seconds; How many seconds between EndRound and RestartRound
 
-
 	UPROPERTY()
 	float DelayOnStartRound = 4;	// Seconds; Delay before can shoot
+	
 
+	
 	UPROPERTY(Replicated)
 	int32 EmptyPlayersCount= 0;		// Count how many players has no ammo
 

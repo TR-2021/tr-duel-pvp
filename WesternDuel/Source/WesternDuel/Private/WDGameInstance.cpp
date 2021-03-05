@@ -6,6 +6,10 @@
 #include "OnlineSessionSettings.h"
 
 
+const  FString UWDGameInstance::LobbyLevel = "/Game/Levels/Lobby/Lobby?listen";
+const  FString UWDGameInstance::MainMenuLevel = "/Game/Levels/MainMenu/MainMenu";
+
+
 void UWDGameInstance::Init()
 {
 	Super::Init();
@@ -43,7 +47,6 @@ void UWDGameInstance::Host(FName SessionName)
 	if (Session != nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Session %s Already exist"), *Session->SessionName.ToString());
-		SessionInterface->DestroySession(SessionName);
 		return;
 	}
 	else
@@ -52,7 +55,12 @@ void UWDGameInstance::Host(FName SessionName)
 	}
 	
 }
-
+void UWDGameInstance::DestroySession()
+{
+	if (!SessionInterface.IsValid()) return;
+	SessionInterface->DestroySession(HostedSessionName);
+	HostedSessionName = "";
+}
 void UWDGameInstance::CreateSession(FName SessionName)
 {
 	if (!SessionInterface) return;
@@ -91,10 +99,11 @@ void UWDGameInstance::OnSessionCreated(FName Name, bool Success)
 {
 	if (Success) 
 	{
+		HostedSessionName = Name;
 		UE_LOG(LogTemp, Warning, TEXT("Session %s Created"), *Name.ToString());
 		UWorld* World = GetWorld();
 		if (!ensure(World != nullptr)) return;
-		World->ServerTravel(LobbyLevel);	// TODO Pass SessionName to Lobby world. Would be useful for destroying
+		World->ServerTravel(UWDGameInstance::LobbyLevel);	// TODO Pass SessionName to Lobby world. Would be useful for destroying
 	}
 }
 
@@ -104,7 +113,7 @@ void UWDGameInstance::OnSessionDestroyed(FName Name, bool Success)
 	if (Success)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Session %s Destroyed"), *Name.ToString());
-		CreateSession(Name);
+		//CreateSession(Name);
 	}
 	else 
 	{

@@ -20,7 +20,10 @@ protected:
 
 	UPROPERTY()
 	FString PlayerName = "";
-	
+
+	UPROPERTY()
+	FName HostedSessionName = "";
+
 	IOnlineSessionPtr SessionInterface;
 	
 	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
@@ -32,26 +35,29 @@ protected:
 	void OnJoinComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Type);
 	
 public:
+	static const  FString LobbyLevel;
+	static const  FString MainMenuLevel;
+
 	FSessionFoundSignature OnSessionFoundEvent;
 
 	UFUNCTION()
-	bool IsNameEmpty() { return  PlayerName.Len() == 0; };
+	bool IsNameEmpty() { return  PlayerName.Len() == 0; }
  
 	UFUNCTION()
-	FString GetPlayerName() { return PlayerName; };
+	FString GetPlayerName() { return PlayerName; }
 
 	UFUNCTION()
-	void SetPlayerName(FString Name) { PlayerName = Name; };
+	void SetPlayerName(FString Name) { PlayerName = Name; }
 
-	UFUNCTION()
 	void Host(FName SessionName);
-	
+
+	UFUNCTION()
+	void DestroySession();
+
 	UFUNCTION()
 	void RequestSearchSession();
 
 	UFUNCTION()
 	void Join(uint32 Index);
-private:
 
-	FString LobbyLevel = "/Game/Levels/Lobby/Lobby?listen";
 };

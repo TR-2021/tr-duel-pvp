@@ -10,6 +10,9 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Containers/Map.h"
 #include "Net/UnrealNetwork.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 
 #include "DrawDebugHelpers.h"
 
@@ -21,6 +24,7 @@ AWDProjectTileActor::AWDProjectTileActor()
 	SphereCollider->InitSphereRadius(10.0f);
 	SphereCollider->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	SphereCollider->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	SphereCollider->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);	// Ignore Capsule
 
 	RootComponent = SphereCollider;
 
@@ -61,19 +65,32 @@ void AWDProjectTileActor::SetLifeTime(float Time)
 
 void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Destroy();
 
 	if (!GetWorld()) return;
 
 	AWD_BaseCharacter* Character = Cast<AWD_BaseCharacter>(OtherActor);
-	if (!Character) return;
+	if (!Character)
+	{
+		Destroy();
+		return;
+	};
 
-		UPhysicalMaterial* PhysMaterial = Hit.PhysMaterial.Get();
-		float ResultDamage = BaseDamage;
-		if (PhysicsDamageMap.Contains(PhysMaterial)) {
-			ResultDamage = PhysicsDamageMap[PhysMaterial];
-		}
-		Character->TakeDamage(ResultDamage, {}, ShotController, this);
+	UPhysicalMaterial* PhysMaterial = Hit.PhysMaterial.Get();
+	float ResultDamage = BaseDamage;
+	if (PhysicsDamageMap.Contains(PhysMaterial)) {
+		ResultDamage = PhysicsDamageMap[PhysMaterial];
+	}
+	SpawnBloodFX(Character->GetMesh(), Hit.BoneName,(-ShotDirection).ToOrientationRotator());
+	Character->TakeDamage(ResultDamage, {}, ShotController, this);
+	Destroy();
+
+}
+void AWDProjectTileActor::SpawnBloodFX_Implementation(USceneComponent* AttachToComponent, FName AttachPointName, FRotator Rotation)
+{
+	if (BloodFX.Num() != 0)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(BloodFX[FMath::Rand()% BloodFX.Num()], AttachToComponent, AttachPointName, FVector::ZeroVector, Rotation, EAttachLocation::SnapToTarget, true);
+	}
 }
 void AWDProjectTileActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

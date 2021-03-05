@@ -5,6 +5,9 @@
 #include "UI/WDGameOverWidget.h"
 #include "UI/WDRoundResultWidget.h"
 #include "UI/WDGamePauseWidget.h"
+#include "Components/Button.h"
+#include "WDGameModeBase.h"
+#include "Character/WDPlayerController.h"
 
 #include "Character/WDGamePlayerState.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,9 +19,15 @@ void AWDGameHUD::BeginPlay()
 	Super::BeginPlay();
 	HUDWidgetMap.Add(EHUDState::ROUND_END, CreateWidget<UWDRoundResultWidget>(GetWorld(), RoundResultWidgetClass));
 	HUDWidgetMap.Add(EHUDState::GAMEOVER, CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass));
-	HUDWidgetMap.Add(EHUDState::PAUSE, CreateWidget<UWDGamePauseWidget>(GetWorld(), PauseWidgetClass));
+	auto PauseWidget = CreateWidget<UWDGamePauseWidget>(GetWorld(), PauseWidgetClass);
+	if (PauseWidget)
+	{
+		PauseWidget->MenuGameButton->OnClicked.AddDynamic(this, &AWDGameHUD::OnMainMenuClicked);
+		PauseWidget->BackGameButton->OnClicked.AddDynamic(this, &AWDGameHUD::OnBackClicked);
+	}
+	HUDWidgetMap.Add(EHUDState::PAUSE, PauseWidget);
 	InitAll();
-	HideAll();
+	SetState(EHUDState::NONE);
 }
 
 
@@ -39,7 +48,27 @@ void AWDGameHUD::SetState(EHUDState State)
 	SetStateVisibility(State);
 }
 
+void AWDGameHUD::OnMainMenuClicked()
+{
+	auto GameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	if (GameMode)
+	{
+		GameMode->FinishGame();
+	}
+	else 
+	{
+		auto LocalController = Cast<AWDPlayerController>(GetOwner());
+		if (LocalController)
+		{
+			LocalController->Disconnect();
+		}
+	}
+}
 
+void AWDGameHUD::OnBackClicked()
+{
+	SetState(EHUDState::NONE);
+}
 void AWDGameHUD::UpdatePlayerInfo()
 {
 	auto LocalController = Cast<AController>(GetOwner());
@@ -91,12 +120,7 @@ void AWDGameHUD::HideAll()
 		UUserWidget* Widget = MapPair.Value;
 		if (Widget)
 		{
-			UE_LOG(LogTemp, Error, TEXT("OK"));
 			Widget->SetVisibility(ESlateVisibility::Hidden);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Error, TEXT("NOT OK"));
 		}
 	}
 }

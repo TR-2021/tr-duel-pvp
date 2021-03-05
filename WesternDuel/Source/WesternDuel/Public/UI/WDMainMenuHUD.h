@@ -7,6 +7,8 @@
 #include "WDMainMenuHUD.generated.h"
 
 class UUserWidget;
+class UWDMainMenuWidget;
+class UWDLobbySearchWidget;
 UCLASS()
 class WESTERNDUEL_API AWDMainMenuHUD : public AHUD
 {
@@ -21,6 +23,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	TSubclassOf<UUserWidget> LobbySearchWidgetClass;
 
+
+	UWDMainMenuWidget* MenuWidget;
+	UWDLobbySearchWidget* LobbyWidget;
 private:
 	void OnJoinRequest();
 };

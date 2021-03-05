@@ -5,6 +5,10 @@
 #include "Character/WD_BaseCharacter.h"
 #include "UI/WDGameHUD.h"
 #include "WDGameStateBase.h"
+#include "WDGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+
+
 
 AWDPlayerController::AWDPlayerController() 
 {
@@ -36,12 +40,11 @@ void AWDPlayerController::BeginPlay()
 
 void AWDPlayerController::OnRestartRound()
 {
-	
 	auto GameHUD = GetHUD<AWDGameHUD>();
 	if (!GameHUD) return;
 
 	UE_LOG(LogTemp, Warning, TEXT("Round Changed"));
-	GameHUD->HideAll();
+	GameHUD->SetState(EHUDState::NONE);
 }
 void AWDPlayerController::OnStartRound()
 {
@@ -80,14 +83,27 @@ void AWDPlayerController::OnPausePressed()
 	EHUDState CurrentState = GameHUD->GetHUDState();
 	if (CurrentState == EHUDState::PAUSE)
 	{
+		if (PrevHUDState == EHUDState::NONE)
+		{
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+		}
 		GameHUD->SetState(PrevHUDState);
 		PrevHUDState = CurrentState;
 	}
 	else
 	{
+		SetInputMode(FInputModeGameAndUI());
+		bShowMouseCursor = true;
 		PrevHUDState = CurrentState;
 		GameHUD->SetState(EHUDState::PAUSE);
 	}
 
 
+}
+
+void AWDPlayerController::Disconnect_Implementation()
+{
+	if(!HasAuthority())
+	GEngine->HandleDisconnect(GetWorld(), GetWorld()->GetNetDriver());
 }

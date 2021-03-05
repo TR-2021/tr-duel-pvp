@@ -51,10 +51,14 @@ public:
 
 private:
 	EHUDState HUDState = EHUDState::NONE;
-
 	TMap<EHUDState, UUserWidget*> HUDWidgetMap;
 
 	void SetStateVisibility(EHUDState State);
-
+	
+	UFUNCTION()
+	void OnMainMenuClicked();
+	
+	UFUNCTION()
+	void OnBackClicked();
 
 };
