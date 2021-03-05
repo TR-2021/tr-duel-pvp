@@ -8,7 +8,7 @@
 
 class AWDProjectTileActor;
 class AWDCrosshairActor;
-
+class USoundCue;
 DECLARE_MULTICAST_DELEGATE(FWeaponEventSignature)
 
 USTRUCT(BlueprintType)
@@ -61,6 +61,12 @@ protected:
 	UPROPERTY(Replicated)
 	bool ShouldDrawCrosshair = true;
 
+	UPROPERTY(EditDefaultsOnly,  Category = "Sound")
+	USoundCue* FireSoundQue;
+
+	UPROPERTY(EditDefaultsOnly,  Category = "Sound")
+	USoundCue* EmptySoundQue;
+
 public:
 	FWeaponEventSignature OnEmpty;
 
@@ -81,6 +87,8 @@ public:
 
 	AWDCrosshairActor* GetCrosshair() { return Crosshair; }
 
+	UFUNCTION(NetMulticast,Reliable)
+	void PlaySound(USoundCue* Sound);
 private:
 	void DecreaseAmmoBy(int32 Num);
 	

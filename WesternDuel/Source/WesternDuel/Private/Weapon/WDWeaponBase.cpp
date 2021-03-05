@@ -6,23 +6,26 @@
 #include "Character/WD_BaseCharacter.h"
 #include "UI/WDCrosshairActor.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 #include "DrawDebugHelpers.h"
 
 AWDWeaponBase::AWDWeaponBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	
+	bReplicates = true;
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Root"));
 	RootComponent = SkeletalMeshComponent;
 	MuzzleSocketName = "Muzzle";
-
 }
 
 void AWDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	Crosshair = GetWorld()->SpawnActor<AWDCrosshairActor>(CurrentWeaponData.CrosshairClass);
-	bReplicates = true;
+	if (CurrentWeaponData.CrosshairClass.Get())
+	{
+		Crosshair = GetWorld()->SpawnActor<AWDCrosshairActor>(CurrentWeaponData.CrosshairClass);
+	}
 }
 void AWDWeaponBase::BeginDestroy()
 {
@@ -34,7 +37,7 @@ void AWDWeaponBase::BeginDestroy()
 void AWDWeaponBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (ShouldDrawCrosshair) {
+	if (ShouldDrawCrosshair&& Crosshair) {
 		FHitResult Hit;
 		FVector Start = GetMuzzleLocation();
 		FVector End = GetMuzzleLocation() + GetActorForwardVector() * 3381.236643389053;
@@ -49,29 +52,46 @@ void AWDWeaponBase::Tick(float DeltaSeconds)
 		Crosshair->SetActorLocation(End);
 	}
 }
-void AWDWeaponBase::Fire_Implementation()
-{
-	if (!IsEmpty() && GetWorld()) {
-		//Fire
-		DecreaseAmmoBy(1);
-		//Spawn ProjectTile
-		
-		FTransform ProjectileTransform = FTransform(FRotator::ZeroRotator, GetMuzzleLocation());
-		
-		auto ShotCharacter = Cast<ACharacter>(GetOwner());		// here is may be BUG if weaponComponent was not attached to Character
-		if (ShotCharacter)
-		{
-			auto ProjectTile = GetWorld()->SpawnActorDeferred<AWDProjectTileActor>(CurrentWeaponData.ProjectileClass, ProjectileTransform, GetOwner());
-			ProjectTile->SetShotDirection(GetActorForwardVector());
-			ProjectTile->SetShotController(ShotCharacter->GetController());
-			ProjectTile->FinishSpawning(ProjectileTransform);
-		}
-	}
-}
-
 bool AWDWeaponBase::IsEmpty()
 {
 	return CurrentWeaponData.CurrentBullets == 0;
+}
+void AWDWeaponBase::Fire_Implementation()
+{
+	if (GetWorld()) {
+		if (!IsEmpty())
+		{
+			//Fire
+			PlaySound(FireSoundQue);
+			DecreaseAmmoBy(1);
+			//Spawn ProjectTile
+
+			FTransform ProjectileTransform = FTransform(FRotator::ZeroRotator, GetMuzzleLocation());
+
+			auto ShotCharacter = Cast<ACharacter>(GetOwner());		// here is may be BUG if weaponComponent was not attached to Character
+			if (ShotCharacter)
+			{
+				auto ProjectTile = GetWorld()->SpawnActorDeferred<AWDProjectTileActor>(CurrentWeaponData.ProjectileClass, ProjectileTransform, GetOwner());
+				ProjectTile->SetShotDirection(GetActorForwardVector());
+				ProjectTile->SetShotController(ShotCharacter->GetController());
+				ProjectTile->FinishSpawning(ProjectileTransform);
+			}
+		}
+		else
+		{
+			PlaySound(EmptySoundQue);
+		}
+		
+	}
+}
+
+
+void AWDWeaponBase::PlaySound_Implementation(USoundCue* Sound)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, SkeletalMeshComponent->GetSocketLocation(MuzzleSocketName));
+	}
 }
 void AWDWeaponBase::DecreaseAmmoBy(int32 Num) {
 	CurrentWeaponData.CurrentBullets = FMath::Clamp<int32>(CurrentWeaponData.CurrentBullets-Num,0, CurrentWeaponData.MaxBullets);
@@ -91,12 +111,14 @@ USkeletalMeshComponent* AWDWeaponBase::GetMesh()
 
 void  AWDWeaponBase::SetCrosshairDrawing(bool IsDrawing) {
 	ShouldDrawCrosshair = IsDrawing;
-	Crosshair->SetActorHiddenInGame(!IsDrawing);
+	if (Crosshair)
+	{
+		Crosshair->SetActorHiddenInGame(!IsDrawing);
+	}
 }
 void AWDWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDWeaponBase, SkeletalMeshComponent);
 	DOREPLIFETIME(AWDWeaponBase, CurrentWeaponData);
 	DOREPLIFETIME(AWDWeaponBase, ShouldDrawCrosshair);
-	
 }

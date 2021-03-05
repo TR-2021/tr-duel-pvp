@@ -10,7 +10,7 @@ class UNiagaraSystem;
 class USphereComponent;
 class UStaticMeshComponent;
 class UProjectileMovementComponent;
-
+class USoundCue;
 UCLASS()
 class WESTERNDUEL_API AWDProjectTileActor : public AActor
 {
@@ -42,6 +42,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Category="VFX")
 	TArray<UNiagaraSystem*> BloodFX;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+	USoundCue* BodyHitSound;
 	
 	UPROPERTY(replicated)
 	FVector ShotDirection;
@@ -61,5 +64,8 @@ public:
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	UFUNCTION(NetMulticast, Reliable)
-		void SpawnBloodFX(USceneComponent* AttachToComponent, FName AttachPointName,  FRotator Rotation);
+	void SpawnBloodFX(USceneComponent* AttachToComponent, FName AttachPointName,  FRotator Rotation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlaySound(USoundCue* Sound,FVector Location);
 };

@@ -10,10 +10,10 @@ AWDCrosshairActor::AWDCrosshairActor()
 	PrimaryActorTick.bCanEverTick = false;
 	SceneComponent = CreateDefaultSubobject<USceneComponent>("Root");
 	RootComponent = SceneComponent;
-
 	WidgetComponent = CreateDefaultSubobject<UWidgetComponent>("WidgetComponent");
 	WidgetComponent->SetupAttachment(GetRootComponent());
 	WidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	bReplicates = true;
 
 }
 
@@ -21,5 +21,4 @@ void AWDCrosshairActor::BeginPlay()
 {
 	Super::BeginPlay();
 	WidgetComponent->SetWidgetClass(CrosshairWidgetClass);
-
 }

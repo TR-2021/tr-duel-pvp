@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "WDGameStateBase.h"
+#include "UI/WDCrosshairActor.h"
 
 // Sets default values for this component's properties
 UWDWeaponComponent::UWDWeaponComponent()

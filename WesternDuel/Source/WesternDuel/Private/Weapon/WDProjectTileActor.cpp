@@ -6,13 +6,13 @@
 #include "Components/SphereComponent.h"
 #include "Character/WD_BaseCharacter.h"
 #include "GameFramework/PlayerController.h"
-#include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Containers/Map.h"
 #include "Net/UnrealNetwork.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -81,6 +81,7 @@ void AWDProjectTileActor::OnHit(UPrimitiveComponent* HitComponent, AActor* Other
 		ResultDamage = PhysicsDamageMap[PhysMaterial];
 	}
 	SpawnBloodFX(Character->GetMesh(), Hit.BoneName,(-ShotDirection).ToOrientationRotator());
+	PlaySound(BodyHitSound,Hit.ImpactPoint);
 	Character->TakeDamage(ResultDamage, {}, ShotController, this);
 	Destroy();
 
@@ -92,7 +93,15 @@ void AWDProjectTileActor::SpawnBloodFX_Implementation(USceneComponent* AttachToC
 		UNiagaraFunctionLibrary::SpawnSystemAttached(BloodFX[FMath::Rand()% BloodFX.Num()], AttachToComponent, AttachPointName, FVector::ZeroVector, Rotation, EAttachLocation::SnapToTarget, true);
 	}
 }
+void AWDProjectTileActor::PlaySound_Implementation(USoundCue* Sound, FVector Location)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound,Location);
+	}
+}
 void AWDProjectTileActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDProjectTileActor, ShotDirection);
 }
+

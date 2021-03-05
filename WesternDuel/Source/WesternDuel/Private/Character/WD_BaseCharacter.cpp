@@ -56,7 +56,7 @@ void AWD_BaseCharacter::BeginPlay()
 	GetCapsuleComponent()->SetIsReplicated(true);
 	GetMesh()->SetIsReplicated(true);
 	GetMesh()->SetCollisionProfileName(TEXT("PhysicsBody"));
-	WeaponComponent->SetCrosshairVisibility(IsLocallyControlled());
+	WeaponComponent->SetCrosshairVisibility(false);
 	
 }
 void AWD_BaseCharacter::UnPossessed()
@@ -242,7 +242,6 @@ void AWD_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 void AWD_BaseCharacter::DeleteWeapon_Implementation()
 {
-	WeaponComponent->GetWeapon()->GetCrosshair()->Destroy();
 	WeaponComponent->GetWeapon()->Destroy();
 }
 
