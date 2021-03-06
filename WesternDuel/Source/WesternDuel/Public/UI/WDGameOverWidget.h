@@ -11,6 +11,7 @@
  */
 
 class UTextBlock;
+class UButton;
 
 UCLASS()
 class WESTERNDUEL_API UWDGameOverWidget : public UUserWidget
@@ -23,7 +24,12 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DeathsTextBox;
 
+
 public:
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* RestartButton;
+
 	void SetKills(int32 Kills);
 	void SetDeaths(int32 Deaths);
 };

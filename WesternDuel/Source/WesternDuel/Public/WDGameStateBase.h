@@ -69,5 +69,8 @@ public:
 	void EndRound();
 
 	UFUNCTION(Server, Reliable)
+	void ResetMatch();
+
+	UFUNCTION(Server, Reliable)
 	void NotifyEmpty();
 };

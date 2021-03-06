@@ -6,11 +6,12 @@
 #include "GameFramework/Character.h"
 #include "WD_BaseCharacter.generated.h"
 
-class USpringArmComponent;
 class UCameraComponent;
-class UCharacterMovementComponent;
+class USphereComponent;
 class UWDWeaponComponent;
 class UWDHealthComponent;
+class USpringArmComponent;
+class UCharacterMovementComponent;
 UCLASS()
 class WESTERNDUEL_API AWD_BaseCharacter : public ACharacter
 {
@@ -23,6 +24,9 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void UnPossessed() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	USphereComponent* SphereOverHead;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	USpringArmComponent* SpringArmComponent;

@@ -13,5 +13,4 @@ void UWDGameOverWidget::SetKills(int32 Kills)
 void UWDGameOverWidget::SetDeaths(int32 Deaths)
 {
 	DeathsTextBox->SetText(FText::FromString("Deaths " + FString::FromInt(Deaths)));
-
 }

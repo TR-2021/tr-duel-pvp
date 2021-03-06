@@ -4,6 +4,8 @@
 #include "WDGameStateBase.h"
 #include "WDGameModeBase.h"
 #include "Net/Unrealnetwork.h"
+#include "Character/WDGamePlayerState.h"
+
 
 void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
@@ -13,6 +15,14 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 	DOREPLIFETIME(AWDGameStateBase, EmptyPlayersCount);
 }
 
+
+void AWDGameStateBase::StartRound_Implementation()
+{
+	GetWorld()->GetTimerManager().SetTimer(Timer,
+		[&]() {
+			OnRoundStart.Broadcast();
+		}, DelayOnStartRound, false);
+}
 
 void AWDGameStateBase::NextRound_Implementation()
 {
@@ -42,6 +52,29 @@ void AWDGameStateBase::NotifyEmpty_Implementation()
 	}
 }
 
+
+void AWDGameStateBase::ResetMatch_Implementation()
+{
+	for (auto PlayerState : PlayerArray)
+	{
+		auto CastState = Cast<AWDGamePlayerState>(PlayerState);
+		if (CastState)
+		{
+			CastState->ResetScore();
+			CastState->ResetBonus();
+		}
+	}
+	
+	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	if (!CurrentGameMode) return;
+
+
+
+	CurrentGameMode->RestartRound(1);
+	CurrentRound = 1;
+	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
+	bIsGameOver = false;
+}
 
 
 void AWDGameStateBase::OnChangeRound_Implementation()
@@ -74,17 +107,10 @@ void AWDGameStateBase::OnRep_RoundChanged()
 
 void AWDGameStateBase::OnRep_GameOver()
 {
-	OnGameOver.Broadcast();
+	if(bIsGameOver)
+		OnGameOver.Broadcast();
 }
 
-
-void AWDGameStateBase::StartRound_Implementation()
-{
-	GetWorld()->GetTimerManager().SetTimer(Timer, 
-	[&]() {
-		OnRoundStart.Broadcast();
-	}, DelayOnStartRound, false);
-}
 
 void AWDGameStateBase::EndRound_Implementation()
 {

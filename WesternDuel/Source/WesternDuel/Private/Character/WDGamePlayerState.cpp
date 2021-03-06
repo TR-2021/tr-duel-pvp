@@ -20,3 +20,14 @@ void AWDGamePlayerState::AddDeath_Implementation(int Num)
 {
 	Deaths += Num;
 }
+
+void AWDGamePlayerState::ResetScore_Implementation()
+{
+	Kills = 0;
+	Deaths = 0;
+}
+
+void AWDGamePlayerState::ResetBonus_Implementation()
+{
+	// TODO ResetBonus
+}

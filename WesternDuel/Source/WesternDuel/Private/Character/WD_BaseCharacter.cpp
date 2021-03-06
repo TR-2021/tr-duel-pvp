@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "UI/WDCrosshairActor.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/WDWeaponComponent.h"
 #include "Components/WDHealthComponent.h"
 #include "Weapon/WDWeaponBase.h"
@@ -23,9 +24,9 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
 	bUseControllerRotationYaw = false;
 	bReplicates = true;
+
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Arm Component"));
 	SpringArmComponent->bUsePawnControlRotation = true;
 	SpringArmComponent->TargetArmLength = 160;
@@ -37,6 +38,11 @@ AWD_BaseCharacter::AWD_BaseCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	CameraComponent->bUsePawnControlRotation = false;
+
+	SphereOverHead = CreateDefaultSubobject<USphereComponent>(TEXT("OverHeadArea"));
+	SphereOverHead->InitSphereRadius(30);
+	SphereOverHead->SetCollisionProfileName(TEXT("OverHead"));
+	SphereOverHead->SetupAttachment(GetMesh());
 
 	WeaponComponent = CreateDefaultSubobject<UWDWeaponComponent>(TEXT("Weapon"));
 	HealthComponent = CreateDefaultSubobject<UWDHealthComponent>(TEXT("Health"));

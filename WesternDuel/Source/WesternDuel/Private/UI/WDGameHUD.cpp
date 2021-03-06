@@ -7,8 +7,8 @@
 #include "UI/WDGamePauseWidget.h"
 #include "Components/Button.h"
 #include "WDGameModeBase.h"
+#include "WDGameStateBase.h"
 #include "Character/WDPlayerController.h"
-
 #include "Character/WDGamePlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -18,7 +18,15 @@ void AWDGameHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	HUDWidgetMap.Add(EHUDState::ROUND_END, CreateWidget<UWDRoundResultWidget>(GetWorld(), RoundResultWidgetClass));
-	HUDWidgetMap.Add(EHUDState::GAMEOVER, CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass));
+	
+	auto GameOverWidget = CreateWidget<UWDGameOverWidget>(GetWorld(), GameOverWidgetClass);
+	if (GameOverWidget)
+	{
+		GameOverWidget->RestartButton->SetVisibility(GetWorld()->GetAuthGameMode() ? ESlateVisibility::Visible : ESlateVisibility::Hidden);		// if we are server; May be problem on listen server
+		GameOverWidget->RestartButton->OnClicked.AddDynamic(this, &AWDGameHUD::OnRestartMatchClicked);
+	}
+	HUDWidgetMap.Add(EHUDState::GAMEOVER, GameOverWidget);
+	
 	auto PauseWidget = CreateWidget<UWDGamePauseWidget>(GetWorld(), PauseWidgetClass);
 	if (PauseWidget)
 	{
@@ -26,8 +34,22 @@ void AWDGameHUD::BeginPlay()
 		PauseWidget->BackGameButton->OnClicked.AddDynamic(this, &AWDGameHUD::OnBackClicked);
 	}
 	HUDWidgetMap.Add(EHUDState::PAUSE, PauseWidget);
+
 	InitAll();
 	SetState(EHUDState::NONE);
+}
+
+
+void AWDGameHUD::InitAll()
+{
+	for (auto MapPair : HUDWidgetMap)
+	{
+		UUserWidget* Widget = MapPair.Value;
+		if (Widget)
+		{
+			Widget->AddToViewport();
+		}
+	}
 }
 
 
@@ -48,6 +70,29 @@ void AWDGameHUD::SetState(EHUDState State)
 	SetStateVisibility(State);
 }
 
+
+void AWDGameHUD::HideAll()
+{
+	for (auto MapPair : HUDWidgetMap)
+	{
+		UUserWidget* Widget = MapPair.Value;
+		if (Widget)
+		{
+			Widget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+}
+
+void AWDGameHUD::OnRestartMatchClicked()
+{
+	auto GameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	auto GameState = GetWorld()->GetGameState<AWDGameStateBase>();
+	if (GameMode && GameState)
+	{
+		GameState->ResetMatch();
+		SetState(EHUDState::NONE);
+	}
+}
 void AWDGameHUD::OnMainMenuClicked()
 {
 	auto GameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
@@ -100,27 +145,3 @@ void AWDGameHUD::SetStateVisibility(EHUDState State)
 	}
 }
 
-
-void AWDGameHUD::InitAll()
-{
-	for (auto MapPair : HUDWidgetMap)
-	{
-		UUserWidget* Widget = MapPair.Value;
-		if (Widget)
-		{
-			Widget->AddToViewport();
-		}
-	}
-}
-
-void AWDGameHUD::HideAll()
-{
-	for (auto MapPair : HUDWidgetMap)
-	{
-		UUserWidget* Widget = MapPair.Value;
-		if (Widget)
-		{
-			Widget->SetVisibility(ESlateVisibility::Hidden);
-		}
-	}
-}

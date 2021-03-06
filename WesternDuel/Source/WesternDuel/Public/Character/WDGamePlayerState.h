@@ -33,6 +33,12 @@ public:
 	UFUNCTION(Server, reliable)
 	void AddDeath(int Num);
 
+	UFUNCTION(Server, reliable)
+	void ResetScore();
+
+	UFUNCTION(Server, reliable)
+	void ResetBonus();
+
 	uint32 GetKills() { return Kills; }
 	uint32 GetDeaths() { return Deaths; }
 

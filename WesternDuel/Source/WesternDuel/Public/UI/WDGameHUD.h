@@ -60,5 +60,7 @@ private:
 	
 	UFUNCTION()
 	void OnBackClicked();
-
+	
+	UFUNCTION()
+	void OnRestartMatchClicked();
 };

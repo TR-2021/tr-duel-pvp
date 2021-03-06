@@ -25,6 +25,7 @@ void AWDPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	SetInputMode(FInputModeGameOnly());
+	bShowMouseCursor = false;
 	if (!GetWorld()) return;
 
 
@@ -45,6 +46,8 @@ void AWDPlayerController::OnRestartRound()
 
 	UE_LOG(LogTemp, Warning, TEXT("Round Changed"));
 	GameHUD->SetState(EHUDState::NONE);
+	SetInputMode(FInputModeGameOnly());
+	bShowMouseCursor = false;
 }
 void AWDPlayerController::OnStartRound()
 {
@@ -55,7 +58,6 @@ void AWDPlayerController::OnStartRound()
 }
 void AWDPlayerController::OnEndRound()
 {
-
 	auto GameHUD = GetHUD<AWDGameHUD>();
 	if (!GameHUD) return;
 
@@ -73,6 +75,7 @@ void AWDPlayerController::OnGameOver()
 
 	DisableInput(this);
 	SetInputMode(FInputModeUIOnly());
+	bShowMouseCursor = true;
 }
 
 void AWDPlayerController::OnPausePressed()

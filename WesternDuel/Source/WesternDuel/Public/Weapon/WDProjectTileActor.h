@@ -46,6 +46,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
 	USoundCue* BodyHitSound;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+	USoundCue* FlyBySound;
+
 	UPROPERTY(replicated)
 	FVector ShotDirection;
 
@@ -55,7 +58,8 @@ protected:
 	UPROPERTY()
 	float LifeSpan=3;
 
-
+	UFUNCTION()
+	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32  OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 public:	
 	void SetShotDirection(FVector Vector);
 	void SetShotController(AController* Controller);
