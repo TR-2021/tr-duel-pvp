@@ -31,7 +31,7 @@ protected:
 	UPROPERTY()
 	float DelayOnEndRound = 2;	// Seconds; How many seconds between EndRound and RestartRound
 
-	UPROPERTY()
+	UPROPERTY(replicated)
 	float DelayOnStartRound = 4;	// Seconds; Delay before can shoot
 	
 

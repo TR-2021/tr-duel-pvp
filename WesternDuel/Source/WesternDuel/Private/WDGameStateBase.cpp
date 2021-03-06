@@ -13,6 +13,7 @@ void AWDGameStateBase::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& O
 	DOREPLIFETIME(AWDGameStateBase, CurrentRound);
 	DOREPLIFETIME(AWDGameStateBase, bIsGameOver);
 	DOREPLIFETIME(AWDGameStateBase, EmptyPlayersCount);
+	DOREPLIFETIME(AWDGameStateBase, DelayOnStartRound);
 }
 
 
@@ -32,48 +33,6 @@ void AWDGameStateBase::NextRound_Implementation()
 	}, DelayAfterDeath, false);
 
 	
-}
-
-
-void AWDGameStateBase::NotifyEmpty_Implementation()
-{
-	if (!GetWorld()) return;
-
-	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
-	if (!CurrentGameMode) return;
-
-	EmptyPlayersCount++;
-
-	if (EmptyPlayersCount >= CurrentGameMode->GetMaxPlayers())
-	{
-		GetWorld()->GetTimerManager().SetTimer(Timer,[&]() {
-				NextRound();
-		}, DelayOnEmpty, false);
-	}
-}
-
-
-void AWDGameStateBase::ResetMatch_Implementation()
-{
-	for (auto PlayerState : PlayerArray)
-	{
-		auto CastState = Cast<AWDGamePlayerState>(PlayerState);
-		if (CastState)
-		{
-			CastState->ResetScore();
-			CastState->ResetBonus();
-		}
-	}
-	
-	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
-	if (!CurrentGameMode) return;
-
-
-
-	CurrentGameMode->RestartRound(1);
-	CurrentRound = 1;
-	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
-	bIsGameOver = false;
 }
 
 
@@ -99,9 +58,52 @@ void AWDGameStateBase::OnChangeRound_Implementation()
 	}
 }
 
+
+void AWDGameStateBase::NotifyEmpty_Implementation()
+{
+	if (!GetWorld()) return;
+
+	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	if (!CurrentGameMode) return;
+
+	EmptyPlayersCount++;
+
+	if (EmptyPlayersCount >= CurrentGameMode->GetMaxPlayers())
+	{
+		GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+			NextRound();
+			}, DelayOnEmpty, false);
+	}
+}
+
+
+void AWDGameStateBase::ResetMatch_Implementation()
+{
+	for (auto PlayerState : PlayerArray)
+	{
+		auto CastState = Cast<AWDGamePlayerState>(PlayerState);
+		if (CastState)
+		{
+			CastState->ResetScore();
+			CastState->ResetBonus();
+		}
+	}
+
+	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
+	if (!CurrentGameMode) return;
+
+
+
+	CurrentGameMode->RestartRound(1);
+	CurrentRound = 1;
+	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
+	bIsGameOver = false;
+}
+
 void AWDGameStateBase::OnRep_RoundChanged()
 {
 	OnRoundChanged.Broadcast();
+	DelayOnStartRound = FMath::RandRange(3, 12);
 	StartRound();
 }
 
