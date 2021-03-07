@@ -9,6 +9,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "DrawDebugHelpers.h"
+#include "Camera/CameraShake.h"
+#include "Particles/ParticleSystemComponent.h"
+
+
 
 AWDWeaponBase::AWDWeaponBase()
 {
@@ -62,7 +66,9 @@ void AWDWeaponBase::Fire_Implementation()
 		if (!IsEmpty())
 		{
 			//Fire
+			SpawnMuzzleFlash();
 			PlaySound(FireSoundQue);
+			PlayCameraShake();
 			DecreaseAmmoBy(1);
 			//Spawn ProjectTile
 
@@ -116,9 +122,38 @@ void  AWDWeaponBase::SetCrosshairDrawing(bool IsDrawing) {
 		Crosshair->SetActorHiddenInGame(!IsDrawing);
 	}
 }
+
+
+void AWDWeaponBase::PlayCameraShake_Implementation()
+{
+	const auto Player = Cast<APawn>(GetOwner());
+	if (!Player) return;
+
+	const auto Controller = Player->GetController<APlayerController>();
+	if (!Controller) return;
+
+	if (CameraShake)
+		Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+
+}
+void AWDWeaponBase::ResetAmmo_Implementation()
+{
+	CurrentWeaponData.CurrentBullets = CurrentWeaponData.MaxBullets;
+}
+
+
+void AWDWeaponBase::SpawnMuzzleFlash_Implementation()
+{
+	//if (SkeletalMeshComponent && MuzzleFlash)
+//	{
+	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, SkeletalMeshComponent, MuzzleSocketName, GetMuzzleLocation(), SkeletalMeshComponent->GetSocketRotation(MuzzleSocketName), EAttachLocation::KeepWorldPosition);
+	//	}
+}
+
 void AWDWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWDWeaponBase, SkeletalMeshComponent);
 	DOREPLIFETIME(AWDWeaponBase, CurrentWeaponData);
 	DOREPLIFETIME(AWDWeaponBase, ShouldDrawCrosshair);
 }
+

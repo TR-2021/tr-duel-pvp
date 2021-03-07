@@ -61,6 +61,7 @@ protected:
 	UFUNCTION()
 	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32  OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 public:	
+	AController* GetInsigatorController() { return ShotController; }
 	void SetShotDirection(FVector Vector);
 	void SetShotController(AController* Controller);
 	void SetLifeTime(float Time);

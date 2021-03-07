@@ -16,12 +16,12 @@ class WESTERNDUEL_API AWDPlayerStart : public APlayerStart
 	AWDPlayerStart(const FObjectInitializer& ObjectInitializer);
 
 protected:
+	virtual void BeginPlay() override;
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
 	UPROPERTY(EditAnywhere, Category = "Round")
 	int32 RoundNumber= 0;							// Indicate when (in which round) this Player Start will be using by GameMode
-
 
 public:
 	UPROPERTY(EditAnywhere, Replicated, Category = "Round", Transient)

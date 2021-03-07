@@ -8,9 +8,11 @@
 #include "Character/WDPlayerController.h"
 #include "Character/WDGamePlayerState.h"
 #include "Character/WD_BaseCharacter.h"
-#include "Weapon/WDWeaponBase.h"
 #include "UI/WDCrosshairActor.h"
 #include "UI/WDGameHUD.h"
+#include "Weapon/WDWeaponBase.h"
+#include "Enviroment/Pickups/WDPickUpBase.h"
+
 #include "Multiplayer/WDPlayerStart.h"
 #include "Kismet/GameplayStatics.h"
 #include "EngineUtils.h"
@@ -27,27 +29,11 @@ AWDGameModeBase::AWDGameModeBase()
 void AWDGameModeBase::StartPlay()
 {
 	Super::StartPlay();
-	//ResetPlayerStarts();
 }
 
 void AWDGameModeBase::PostLogin(APlayerController* NewPlayer) {
 	Super::PostLogin(NewPlayer);
 	HandleNewPLayer(NewPlayer);
-}
-
-void AWDGameModeBase::ResetPlayerStarts()
-{
-	TArray<AActor*> AllStarts;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWDPlayerStart::StaticClass(), AllStarts);
-
-	for (auto Start : AllStarts)
-	{
-		auto CastedStart = Cast<AWDPlayerStart>(Start);
-		if (CastedStart)
-		{
-			CastedStart->SetOccupition(false);
-		}
-	}
 }
 
 void AWDGameModeBase::HandleSeamlessTravelPlayer(AController*& NewPlayer)
@@ -122,12 +108,43 @@ void AWDGameModeBase::RestartRound(int NextRound)
 		}
 	}
 	ClearWorld();
+	ResetPickups();
 	for (auto Player : Players)
 	{
 		Player->StartSpot = nullptr;
 		RestartPlayer(Player);
 	}
 
+}
+
+void AWDGameModeBase::ResetPlayerStarts()
+{
+	TArray<AActor*> AllStarts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWDPlayerStart::StaticClass(), AllStarts);
+
+	for (auto Start : AllStarts)
+	{
+		auto CastedStart = Cast<AWDPlayerStart>(Start);
+		if (CastedStart)
+		{
+			CastedStart->SetOccupition(false);
+		}
+	}
+}
+
+
+void AWDGameModeBase::ResetPickups()
+{
+	TArray<AActor*> AllPickups;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWDPickUpBase::StaticClass(), AllPickups);
+
+	for (auto Pickup : AllPickups)
+	{
+		if (Pickup)
+		{
+			Pickup->Reset();
+		}
+	}
 }
 
 AActor* AWDGameModeBase::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)

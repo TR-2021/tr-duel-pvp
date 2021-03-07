@@ -6,10 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "WDWeaponBase.generated.h"
 
+class UParticleSystem;
 class AWDProjectTileActor;
 class AWDCrosshairActor;
 class USoundCue;
 DECLARE_MULTICAST_DELEGATE(FWeaponEventSignature)
+
+
+class UCameraShakeBase;
 
 USTRUCT(BlueprintType)
 struct FWeaponData {
@@ -58,6 +62,12 @@ protected:
 	UPROPERTY()
 	AWDCrosshairActor* Crosshair;
 
+	UPROPERTY(EditDefaultsOnly, replicated, Category = "VFX")
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	TSubclassOf<UCameraShakeBase> CameraShake;
+
 	UPROPERTY(Replicated)
 	bool ShouldDrawCrosshair = true;
 
@@ -67,6 +77,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly,  Category = "Sound")
 	USoundCue* EmptySoundQue;
 
+	UFUNCTION(Client, Reliable)
+	void PlayCameraShake();
 public:
 	FWeaponEventSignature OnEmpty;
 
@@ -89,6 +101,13 @@ public:
 
 	UFUNCTION(NetMulticast,Reliable)
 	void PlaySound(USoundCue* Sound);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void SpawnMuzzleFlash();
+
+	UFUNCTION(Server, Reliable)
+	void ResetAmmo();
+	
 private:
 	void DecreaseAmmoBy(int32 Num);
 	

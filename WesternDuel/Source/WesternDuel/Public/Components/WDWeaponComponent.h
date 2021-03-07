@@ -46,6 +46,9 @@ public:
 	void Detach();
 	void SetCrosshairVisibility(bool Visible);
 	void DestroyWeapon();
+
+	UFUNCTION(Server, Reliable)
+	void AddAmmo();			// Reset Ammo to Max available
 private:
 	UFUNCTION()
 	void OnEmptyGun();

@@ -44,14 +44,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "VFX")
 	TSubclassOf<UCameraShakeBase> CameraShake;
 	
-	void SetHealth(float Health);
+
+	void SetHealth(float Health, bool AllowOverHeal);
 
 public:
 	UFUNCTION()
 	void OnAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UFUNCTION(BlueprintCallable)
 	bool IsDead();
+
 	UFUNCTION(BlueprintCallable)
 	float GetHealth();
+
+	UFUNCTION(Server, Reliable,BlueprintCallable)
+	void Heal(float Amount, bool AllowOverHeal);
 
 private:
 	UFUNCTION(Client, Reliable)

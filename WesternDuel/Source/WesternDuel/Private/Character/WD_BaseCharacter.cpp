@@ -76,10 +76,6 @@ void AWD_BaseCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if(IsLocallyControlled())
 		UpdateAimDirection(GetBaseAimRotation());
-	FVector BaseAimDirection = AimRotator.Vector();
-	FVector ForwardVector = GetActorRotation().Vector();
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + BaseAimDirection * 400, FColor::Red, false, 0.1, 0, 1);
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + ForwardVector * 400, FColor::Green, false, 0.1, 0, 1);
 }
 
 // Called to bind functionality to input
@@ -207,10 +203,13 @@ void AWD_BaseCharacter::OnDie(AController* KilledBy)
 		{
 			CurrentPlayerGameState->AddDeath(1);
 		}
-		auto KillerPlayerGameState = KilledBy->GetPlayerState<AWDGamePlayerState>();
-		if (KillerPlayerGameState && GetController() != KilledBy)
+		if (KilledBy)
 		{
-			KillerPlayerGameState->AddKill(1);
+			auto KillerPlayerGameState = KilledBy->GetPlayerState<AWDGamePlayerState>();
+			if (KillerPlayerGameState && GetController() != KilledBy)
+			{
+				KillerPlayerGameState->AddKill(1);
+			}
 		}
 	KillCharacter();
 	GetWorld()->GetGameState<AWDGameStateBase>()->NextRound();
@@ -226,6 +225,7 @@ void AWD_BaseCharacter::KillCharacter_Implementation() {
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetAllBodiesSimulatePhysics(true);
 	GetMesh()->SetEnablePhysicsBlending(true);
+	
 	GetMesh()->AddForceAtLocation(-GetActorForwardVector() * 3000000, GetActorLocation(), "spine_01");
 	
 	const auto PlayerController = Cast<APlayerController>(GetController());

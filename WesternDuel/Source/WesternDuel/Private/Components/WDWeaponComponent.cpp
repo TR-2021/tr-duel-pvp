@@ -2,11 +2,12 @@
 
 
 #include "Components/WDWeaponComponent.h"
-#include "Weapon/WDWeaponBase.h"
-#include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "WDGameStateBase.h"
+#include "GameFramework/Character.h"
 #include "UI/WDCrosshairActor.h"
+#include "Weapon/WDWeaponBase.h"
+#include "WDGameStateBase.h"
+
 
 // Sets default values for this component's properties
 UWDWeaponComponent::UWDWeaponComponent()
@@ -101,4 +102,12 @@ void UWDWeaponComponent::Detach() {
 }
 void UWDWeaponComponent::SetCrosshairVisibility(bool Visible) {
 	CurrentWeapon->SetCrosshairDrawing(Visible);
+}
+
+void UWDWeaponComponent::AddAmmo_Implementation()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->ResetAmmo();
+	}
 }

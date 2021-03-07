@@ -2,15 +2,21 @@
 
 
 #include "Multiplayer/WDPlayerStart.h"
+#include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 
 AWDPlayerStart::AWDPlayerStart(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	bReplicates= true;
+	GetCapsuleComponent()->SetMobility(EComponentMobility::Movable);
+
 }
 
-
+void AWDPlayerStart::BeginPlay()
+{
+	Super::BeginPlay();
+}
 void AWDPlayerStart::SetOccupition_Implementation(bool IsOccupied)
 {
 	bIsOccupied = IsOccupied;

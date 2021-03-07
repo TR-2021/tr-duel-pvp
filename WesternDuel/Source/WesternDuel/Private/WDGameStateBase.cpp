@@ -92,10 +92,8 @@ void AWDGameStateBase::ResetMatch_Implementation()
 	auto CurrentGameMode = GetWorld()->GetAuthGameMode<AWDGameModeBase>();
 	if (!CurrentGameMode) return;
 
-
-
-	CurrentGameMode->RestartRound(1);
 	CurrentRound = 0;
+	CurrentGameMode->RestartRound(CurrentRound);
 	OnRep_RoundChanged();			// Call implicitly to trigger event on Server
 	bIsGameOver = false;
 }

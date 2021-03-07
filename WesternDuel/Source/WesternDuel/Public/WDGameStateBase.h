@@ -32,7 +32,7 @@ protected:
 	float DelayOnEndRound = 2;	// Seconds; How many seconds between EndRound and RestartRound
 
 	UPROPERTY(replicated)
-	float DelayOnStartRound = 4;	// Seconds; Delay before can shoot
+	float DelayOnStartRound = FMath::RandRange(5,10);	// Seconds; Delay before can shoot
 	
 
 	

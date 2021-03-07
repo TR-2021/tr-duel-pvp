@@ -20,7 +20,7 @@ protected:
 	int32 MaxPlayers = 2;
 	
 	UPROPERTY(EditDefaultsOnly)
-	int32 MaxRounds = 3;
+	int32 MaxRounds = 4;
 	
 	int32 CurrentRound = 0;
 
@@ -59,9 +59,17 @@ public:
 	TArray<AWDPlayerStart*> GetPlayerStartByRound(int32 round);
 	int32 GetMaxRounds() { return MaxRounds; }
 	int32 GetMaxPlayers() { return MaxPlayers; }
+	
+	UFUNCTION()
+	void RestartRound(int32 NextRound);
+	
 	UFUNCTION()
 	void ResetPlayerStarts();
-	void RestartRound(int32 NextRound);
+	
+	UFUNCTION()
+	void ResetPickups();
+	
+	UFUNCTION()
 	void FinishGame();
 };
 
