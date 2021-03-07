@@ -73,4 +73,8 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void NotifyEmpty();
+
+	UFUNCTION(Server, Reliable)
+	void UpdateRoundStart();
+
 };

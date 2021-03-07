@@ -101,10 +101,14 @@ void AWDGameStateBase::ResetMatch_Implementation()
 void AWDGameStateBase::OnRep_RoundChanged()
 {
 	OnRoundChanged.Broadcast();
-	DelayOnStartRound = FMath::RandRange(3, 12);
+	UpdateRoundStart();
 	StartRound();
 }
+void AWDGameStateBase::UpdateRoundStart_Implementation()
+{
+	DelayOnStartRound = FMath::RandRange(3, 12);
 
+}
 void AWDGameStateBase::OnRep_GameOver()
 {
 	if(bIsGameOver)
