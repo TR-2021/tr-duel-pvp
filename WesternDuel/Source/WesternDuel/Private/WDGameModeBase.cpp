@@ -17,7 +17,7 @@
 
 
 
-AWDGameModeBase::AWDGameModeBase() 
+AWDGameModeBase::AWDGameModeBase()
 {
 	PlayerControllerClass = AWDPlayerController::StaticClass();
 	GameStateClass = AWDGameStateBase::StaticClass();
@@ -27,11 +27,27 @@ AWDGameModeBase::AWDGameModeBase()
 void AWDGameModeBase::StartPlay()
 {
 	Super::StartPlay();
+	//ResetPlayerStarts();
 }
 
 void AWDGameModeBase::PostLogin(APlayerController* NewPlayer) {
 	Super::PostLogin(NewPlayer);
 	HandleNewPLayer(NewPlayer);
+}
+
+void AWDGameModeBase::ResetPlayerStarts()
+{
+	TArray<AActor*> AllStarts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWDPlayerStart::StaticClass(), AllStarts);
+
+	for (auto Start : AllStarts)
+	{
+		auto CastedStart = Cast<AWDPlayerStart>(Start);
+		if (CastedStart)
+		{
+			CastedStart->SetOccupition(false);
+		}
+	}
 }
 
 void AWDGameModeBase::HandleSeamlessTravelPlayer(AController*& NewPlayer)
@@ -54,7 +70,6 @@ void AWDGameModeBase::HandleNewPLayer(APlayerController* NewPlayer)
 	if (Players.Num() == MaxPlayers)
 	{
 		ClearPause();
-
 		auto CurrentGameState = GetWorld()->GetGameState<AWDGameStateBase>();
 		if (!CurrentGameState) return;
 
@@ -62,7 +77,8 @@ void AWDGameModeBase::HandleNewPLayer(APlayerController* NewPlayer)
 	}
 }
 
-void AWDGameModeBase::Logout(AController* Exiting) {
+void AWDGameModeBase::Logout(AController* Exiting)
+{
 	Super::Logout(Exiting);
 	AWDPlayerController* NewPlayerController = Cast<AWDPlayerController>(Exiting);
 	if (!NewPlayerController) return;
@@ -83,8 +99,7 @@ void AWDGameModeBase::FinishGame()
 	{
 		GameInstance->DestroySession();
 	}
-	//UGameplayStatics::OpenLevel(GetWorld(), FName(UWDGameInstance::MainMenuLevel));
-	GetWorld()->ServerTravel(UWDGameInstance::MainMenuLevel, true, true);				
+	GetWorld()->ServerTravel(UWDGameInstance::MainMenuLevel, true, true);
 }
 
 
@@ -95,13 +110,10 @@ void AWDGameModeBase::FinishGame()
 */
 void AWDGameModeBase::RestartRound(int NextRound)
 {
+	ResetPlayerStarts();
 	CurrentRound = NextRound;
 	UWorld* World = GetWorld();
-	for (TActorIterator<AWDPlayerStart> It(World); It; ++It)
-	{
-		AWDPlayerStart* PlayerStart = *It;
-		PlayerStart->SetOccupition(false);
-	}
+
 	for (auto Player : Players)
 	{
 		if (Player && Player->GetPawn())
@@ -112,45 +124,68 @@ void AWDGameModeBase::RestartRound(int NextRound)
 	ClearWorld();
 	for (auto Player : Players)
 	{
+		Player->StartSpot = nullptr;
 		RestartPlayer(Player);
 	}
 
 }
-///*
-//* Almost the same as Parent Class, 
-//* Just instead of looking for APlayerStart we look for AWDPlayerStart
-//*/
-//AActor* AWDGameModeBase::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
-//{
-//	return Super::FindPlayerStart_Implementation(Player, IncomingName);
-//	UWorld* World = GetWorld();
-//
-//	AActor* BestStart = nullptr; //ChoosePlayerStart(Player);
-//	for (TActorIterator<AWDPlayerStart> It(World); It; ++It)
-//	{
-//		AWDPlayerStart* PlayerStart = *It;
-//		
-//		UE_LOG(LogTemp, Warning, TEXT("current round %d - Start round %d - occup[ied %d"), CurrentRound, PlayerStart->GetRoundNumber(), PlayerStart->IsOccupied()?1:0);
-//		if (PlayerStart->GetRoundNumber() == CurrentRound && !PlayerStart->IsOccupied())
-//		{
-//			PlayerStart->SetOccupition(true);
-//			BestStart = PlayerStart;
-//			break;
-//		}
-//	}
-//
-//	if (BestStart == nullptr)
-//	{
-//		BestStart = Super::FindPlayerStart_Implementation(Player, IncomingName);
-//	}
-//
-//	return BestStart;
-//}
 
+AActor* AWDGameModeBase::FindPlayerStart_Implementation(AController* Player, const FString& IncomingName)
+{
+	return Super::FindPlayerStart_Implementation(Player, IncomingName);
+		//ChoosePlayerStart_Implementation(Player);
+}
+
+/*
+* Almost the same as Parent Class,
+* Just instead of looking for APlayerStart we look for AWDPlayerStart
+*/
+AActor* AWDGameModeBase::ChoosePlayerStart_Implementation(AController* Player)
+{
+	if (!Cast<AWDPlayerController>(Player))
+	{
+		return Super::ChoosePlayerStart_Implementation(Player);
+	}
+	UWorld* World = GetWorld();
+	AActor* BestStart = nullptr; //ChoosePlayerStart(Player);
+	TArray<AWDPlayerStart*> AllStarts = GetPlayerStartByRound(CurrentRound);
+	for (auto Start : AllStarts)
+	{																					    
+		if (!Start->IsOccupied())
+		{
+			Start->bIsOccupied = true;
+			BestStart = Start;
+			break;         
+		}
+	}
+
+	if (BestStart == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is nothing found, trying call super's function"));
+		BestStart = Super::ChoosePlayerStart_Implementation(Player);
+	}
+	return BestStart;
+}
+
+
+TArray<AWDPlayerStart*> AWDGameModeBase::GetPlayerStartByRound(int32 Round)
+{
+	TArray<AWDPlayerStart*> Result;
+	UWorld* World = GetWorld();
+	for (TActorIterator<AWDPlayerStart> It(World); It; ++It)
+	{
+		AWDPlayerStart* Start = *It;
+		if (Start && Start->GetRoundNumber() == Round)
+		{
+			Result.Add(Start);
+		}
+	}
+	return Result;
+}
 /*
 * Remove all bodies and weapons
 */
-void AWDGameModeBase::ClearWorld() 
+void AWDGameModeBase::ClearWorld()
 {
 	RemoveAllActorsByClass<AWD_BaseCharacter>();
 	RemoveAllActorsByClass<AWDWeaponBase>();

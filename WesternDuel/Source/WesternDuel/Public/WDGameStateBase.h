@@ -17,7 +17,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	UPROPERTY(ReplicatedUsing=OnRep_RoundChanged)
-	int32 CurrentRound = 1;
+	int32 CurrentRound = 0;
 
 	UPROPERTY(ReplicatedUsing=OnRep_GameOver)
 	bool bIsGameOver = false;
