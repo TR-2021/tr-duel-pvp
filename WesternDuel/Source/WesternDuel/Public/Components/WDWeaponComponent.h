@@ -33,7 +33,8 @@ protected:
 
 	UPROPERTY()
 	AWDWeaponBase* CurrentWeapon;
-
+	
+	FTimerHandle Timer;
 
 	void AttachWeaponTo(AWDWeaponBase* Weapon, USceneComponent* Mesh, FName SocketName);
 

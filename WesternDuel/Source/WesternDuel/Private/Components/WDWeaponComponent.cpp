@@ -55,10 +55,20 @@ void UWDWeaponComponent::OnEmptyGun()
 {
 	if (!GetWorld()) return;
 
-	auto CurrentGameState = GetWorld()->GetGameState<AWDGameStateBase>();
-	if (!CurrentGameState) return;
+	if (GetWorld() && CurrentWeapon)
+	{
+		GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+		
+			if (CurrentWeapon->IsEmpty())
+			{
 
-	CurrentGameState->NotifyEmpty();
+				auto CurrentGameState = GetWorld()->GetGameState<AWDGameStateBase>();
+				if (!CurrentGameState) return;
+
+				CurrentGameState->NotifyEmpty();
+			}
+		}, 0.5, false);
+	}
 }
 void UWDWeaponComponent::AttachWeaponTo(AWDWeaponBase* Weapon, USceneComponent* Mesh, FName SocketName)
 {
