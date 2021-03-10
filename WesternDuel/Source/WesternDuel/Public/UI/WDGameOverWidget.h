@@ -24,6 +24,11 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* DeathsTextBox;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* GameOverTextBox;
+
+	
+	
 
 public:
 

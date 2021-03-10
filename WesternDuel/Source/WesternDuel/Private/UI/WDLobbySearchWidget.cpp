@@ -66,5 +66,4 @@ void UWDLobbySearchWidget::OnRowClicked(int32 Id)
 	if (!GameInstace) return;
 
 	GameInstace->Join(Id);
-	UE_LOG(LogTemp, Warning, TEXT("Server Clicked %d"),Id);
 }

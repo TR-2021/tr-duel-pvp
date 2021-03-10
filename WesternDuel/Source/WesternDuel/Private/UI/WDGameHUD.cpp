@@ -120,8 +120,21 @@ void AWDGameHUD::UpdatePlayerInfo()
 	if (LocalController)
 	{
 		auto PlayerState = Cast< AWDGamePlayerState>(LocalController->PlayerState);
-		if (PlayerState)
+		auto GameState = GetWorld()->GetGameState<AWDGameStateBase>();
+
+		if (PlayerState && GameState)
 		{
+			
+			int32 OwnPoints = PlayerState->GetPoints();
+			for (auto State : GameState->PlayerArray)
+			{
+				auto CastedState = Cast<AWDGamePlayerState>(State);
+				if (CastedState)
+				{
+
+				}
+			}
+			
 			auto GameOverWidget = Cast< UWDGameOverWidget>(HUDWidgetMap[EHUDState::GAMEOVER]);
 			if (GameOverWidget)
 			{

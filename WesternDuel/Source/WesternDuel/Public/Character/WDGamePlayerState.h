@@ -41,5 +41,6 @@ public:
 
 	uint32 GetKills() { return Kills; }
 	uint32 GetDeaths() { return Deaths; }
+	uint32 GetPoints() { return Kills*2 - Deaths; }
 
 };

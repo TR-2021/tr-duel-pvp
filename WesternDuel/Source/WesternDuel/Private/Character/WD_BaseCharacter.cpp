@@ -7,6 +7,7 @@
 #include "Character/WDGamePlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/SpectatorPawn.h"
 #include "Camera/CameraComponent.h"
 #include "UI/WDCrosshairActor.h"
 #include "Components/CapsuleComponent.h"
@@ -228,11 +229,18 @@ void AWD_BaseCharacter::KillCharacter_Implementation() {
 	
 	GetMesh()->AddForceAtLocation(-GetActorForwardVector() * 3000000, GetActorLocation(), "spine_01");
 	
+	
 	const auto PlayerController = Cast<APlayerController>(GetController());
 	if (!PlayerController) return;
-	
-	PlayerController->ChangeState(NAME_Spectating);
+
+	auto Spectator = GetWorld()->SpawnActor<ASpectatorPawn>();
+	if (Spectator && HasAuthority())
+	{
+		Spectator->TeleportTo(GetActorLocation(), GetActorRotation(), false, true);
+		PlayerController->Possess(Spectator);
+	}
 }
+
 void AWD_BaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AWD_BaseCharacter, bGunIsTaken);
